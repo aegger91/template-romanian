@@ -1,0 +1,123 @@
+---
+import type { Locale } from '../config/site';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import SectionHead from '../components/SectionHead.astro';
+import AmountForm from '../components/AmountForm.astro';
+import Ornament from '../components/Ornament.astro';
+import Icon from '../components/Icon.astro';
+import { siteConfig } from '../config/site';
+import { images } from '../config/images';
+import { t } from '../i18n/ui';
+import { p } from '../i18n/pages';
+import { crumbs } from './nav';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const dict = t(locale);
+const pg = p(locale);
+const d = pg.donate;
+const m = images.media;
+const showProgress = siteConfig.features.donationProgress && siteConfig.features.donationAutoCount;
+const iban = d.ways[0].lines[1].split(': ')[1];
+---
+<BaseLayout locale={locale} title={dict.donate.title} current="donate" description={d.lede}>
+  <PageHero
+    image={{ src: images.pages.donate.src, alt: images.pages.donate.alt[locale] }}
+    eyebrow={dict.nav.donate}
+    title={dict.donate.title}
+    lede={d.lede}
+    crumbs={crumbs(locale, [{ label: dict.nav.donate }])}
+    crumbLabel={pg.common.breadcrumb}
+  />
+
+  <section class="reveal section">
+    <div class="container split split--form-main">
+      <div class="card card--gold form-card" id="donate-form">
+        <SectionHead eyebrow={d.formEyebrow} title={d.formTitle} />
+        <p class="form-note" style="margin-top:-0.75rem;">{dict.donate.intro}</p>
+        <AmountForm locale={locale} kind="donate" />
+      </div>
+      <aside class="support-panel">
+        <span class="support-panel__cross" aria-hidden="true"><img src="/icons/cross-trefoil.svg" alt="" width="30" height="30" /></span>
+        <p class="eyebrow">{d.asideEyebrow}</p>
+        <h2>{d.asideTitle}</h2>
+        <Ornament light align="center" />
+        <ul class="support-list">
+          {d.asideItems.map((it) => (
+            <li><span class="support-list__icon"><Icon name={it.icon} size={20} /></span>{it.text}</li>
+          ))}
+        </ul>
+        <figure class="support-panel__media">
+          <img src={m.frescoHumor.src} alt={m.frescoHumor.alt[locale]} width="1200" height="900" loading="lazy" />
+        </figure>
+      </aside>
+    </div>
+  </section>
+
+  <section class="reveal section section--band">
+    <div class="container">
+      <SectionHead eyebrow={d.waysEyebrow} title={d.waysTitle} />
+      <div class="card-grid">
+        {d.ways.map((w, i) => (
+          <article class="card card--gold feature-card card--lift">
+            <span class="feature-card__icon"><Icon name={w.icon} size={26} /></span>
+            <h3>{w.title}</h3>
+            <ul class="plain-lines">
+              {w.lines.map((line) => <li>{line}</li>)}
+            </ul>
+            {i === 0 && (
+              <button type="button" class="btn btn-secondary btn-sm js-only" data-copy={iban} data-copied={d.copied}>
+                <Icon name="copy" size={16} /><span data-copy-label>{d.copy}</span>
+              </button>
+            )}
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="reveal section">
+    <div class="container split">
+      <div class="media-frame media-frame--arch">
+        <img src={m.frescoSucevita.src} alt={m.frescoSucevita.alt[locale]} width="1200" height="900" loading="lazy" />
+      </div>
+      <div>
+        <SectionHead eyebrow={d.projectEyebrow} title={d.projectTitle} />
+        <p class="lede">{d.projectText}</p>
+        {showProgress && (
+          <div>
+            <p class="eyebrow">{dict.donate.progressLabel}</p>
+            <div class="progress" aria-hidden="true"><span style="width:42%"></span></div>
+          </div>
+        )}
+        <a class="btn btn-accent" href="#donate-form">{d.projectCta}</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="reveal section section--dark section--ornate">
+    <div class="container thanks">
+      <img src="/icons/cross-trefoil.svg" alt="" width="34" height="34" class="thanks__cross" />
+      <h2>{d.thanksTitle}</h2>
+      <Ornament light align="center" />
+      <p class="lede lede--light">{d.thanksText}</p>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const label = btn.querySelector('[data-copy-label]');
+      try {
+        await navigator.clipboard.writeText(btn.dataset.copy || '');
+        if (label) label.textContent = btn.dataset.copied || '';
+      } catch {
+        /* clipboard unavailable */
+      }
+    });
+  });
+</script>

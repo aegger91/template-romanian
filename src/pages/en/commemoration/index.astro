@@ -1,26 +1,4 @@
 ---
-import BaseLayout from '../../../layouts/BaseLayout.astro';
-import Ornament from '../../../components/Ornament.astro';
-import AmountForm from '../../../components/AmountForm.astro';
-import { t } from '../../../i18n/ui';
-
-const locale = 'en' as const;
-const dict = t(locale);
+import View from '../../../views/PomelniceView.astro';
 ---
-<BaseLayout locale={locale} title={dict.pomelnice.title} current="pomelnice">
-  <header class="reveal page-hero">
-    <div class="container">
-      <p class="eyebrow">{dict.nav.pomelnice}</p>
-      <h1>{dict.pomelnice.title}</h1>
-      <p class="lede">{dict.pomelnice.intro}</p>
-      <Ornament />
-    </div>
-  </header>
-  <section class="reveal section">
-    <div class="container" style="max-width:42rem;">
-      <div class="card card--gold">
-        <AmountForm locale={locale} kind="pomelnice" />
-      </div>
-    </div>
-  </section>
-</BaseLayout>
+<View locale="en" />

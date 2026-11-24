@@ -1,21 +1,48 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import Icon from '../components/Icon.astro';
+import { images } from '../config/images';
 import { t } from '../i18n/ui';
+import { p } from '../i18n/pages';
 
-// Default 404 uses Romanian; English visitors can switch via nav.
 const locale = 'ro' as const;
 const dict = t(locale);
+const pg = p(locale);
+const links = [
+  { href: dict.paths.schedule, label: dict.nav.schedule, en: '/en/schedule/', enLabel: 'Services' },
+  { href: dict.paths.parish, label: dict.nav.parish, en: '/en/parish/', enLabel: 'Our Parish' },
+  { href: dict.paths.pomelnice, label: dict.nav.pomelnice, en: '/en/commemoration/', enLabel: 'Commemoration names' },
+  { href: dict.paths.contact, label: dict.nav.contact, en: '/en/contact/', enLabel: 'Contact' },
+];
 ---
 <BaseLayout locale={locale} title={dict.notFound.title} current="home">
-  <section class="reveal section">
-    <div class="container" style="text-align:center;padding-block:4rem;">
-      <img src="/icons/cross-trefoil.svg" alt="" width="48" height="48" style="margin:0 auto 1rem;" />
-      <h1>{dict.notFound.title}</h1>
-      <p class="lede" style="margin-inline:auto;">{dict.notFound.text}</p>
-      <p>
-        <a class="btn btn-primary" href="/">{dict.notFound.home}</a>
-        <a class="btn btn-secondary" href="/en/">Home (EN)</a>
-      </p>
+  <PageHero
+    image={{ src: images.pages.notFound.src, alt: images.pages.notFound.alt[locale] }}
+    eyebrow={pg.notFound.eyebrow}
+    title={dict.notFound.title}
+    lede={dict.notFound.text}
+    crumbs={[{ label: dict.nav.home, href: '/' }, { label: '404' }]}
+    crumbLabel={pg.common.breadcrumb}
+  >
+    <p class="phero__lede phero__lede--alt" lang="en">The page you requested does not exist.</p>
+    <div class="hero__actions" style="margin-top:1.25rem;">
+      <a class="btn btn-gold" href="/">{dict.notFound.home}</a>
+      <a class="btn btn-ghost" href="/en/">Home (EN)</a>
+    </div>
+  </PageHero>
+
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow">{pg.notFound.links} · Useful pages</p>
+      <div class="quick-links">
+        {links.map((l) => (
+          <div class="quick-link card--lift">
+            <a href={l.href}>{l.label} <Icon name="arrow" size={16} /></a>
+            <a class="quick-link__en" href={l.en} lang="en">{l.enLabel}</a>
+          </div>
+        ))}
+      </div>
     </div>
   </section>
 </BaseLayout>

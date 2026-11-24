@@ -1,0 +1,92 @@
+---
+import type { Locale } from '../config/site';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import SubNav from '../components/SubNav.astro';
+import SectionHead from '../components/SectionHead.astro';
+import AmountForm from '../components/AmountForm.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Icon from '../components/Icon.astro';
+import { images } from '../config/images';
+import { t } from '../i18n/ui';
+import { p } from '../i18n/pages';
+import { serviceTabs, crumbs } from './nav';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const dict = t(locale);
+const pg = p(locale);
+const c = pg.pomelnice;
+const m = images.media;
+---
+<BaseLayout locale={locale} title={dict.pomelnice.title} current="pomelnice" description={c.lede}>
+  <PageHero
+    image={{ src: images.pages.pomelnice.src, alt: images.pages.pomelnice.alt[locale] }}
+    eyebrow={dict.nav.schedule}
+    title={dict.pomelnice.title}
+    lede={c.lede}
+    crumbs={crumbs(locale, [{ label: dict.nav.schedule, href: dict.paths.schedule }, { label: dict.nav.pomelnice }])}
+    crumbLabel={pg.common.breadcrumb}
+    icon={{ src: m.iconTheotokosBlue.src, alt: m.iconTheotokosBlue.alt[locale] }}
+  />
+  <SubNav items={serviceTabs(locale, 'pomelnice')} label={pg.common.sectionNav} />
+
+  <section class="reveal section">
+    <div class="container split split--form-main">
+      <div class="card card--gold form-card">
+        <SectionHead eyebrow={c.formEyebrow} title={c.formTitle} />
+        <p class="form-note" style="margin-top:-0.75rem;">{dict.pomelnice.intro}</p>
+        <AmountForm locale={locale} kind="pomelnice" />
+      </div>
+      <aside class="aside-stack aside-stack--sticky">
+        <figure class="photo-note">
+          <img src={m.candleBoxes.src} alt={m.candleBoxes.alt[locale]} width="1200" height="900" loading="lazy" />
+          <figcaption>{c.asideCaption}</figcaption>
+        </figure>
+        <div class="card aside-card">
+          <h3 class="aside-card__title"><Icon name="candle" size={20} />{c.asideTitle}</h3>
+          <p style="margin-bottom:0.65rem;">{c.asideText}</p>
+          <p class="aside-card__strong"><Icon name="clock" size={17} />{c.asideHours}</p>
+        </div>
+        <div class="read-card">
+          <h3 class="read-card__title"><Icon name="calendar" size={20} />{c.readTitle}</h3>
+          <dl class="read-card__list">
+            {c.readItems.map((item) => (
+              <div class="read-card__row">
+                <dt>{item.label}</dt>
+                <dd>{item.value}</dd>
+              </div>
+            ))}
+          </dl>
+          <a class="btn btn-gold btn-sm" href={dict.paths.schedule}>{dict.nav.schedule}<Icon name="arrow" size={15} /></a>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="reveal section section--band">
+    <div class="container">
+      <SectionHead eyebrow={c.stepsEyebrow} title={c.stepsTitle} align="center" />
+      <ol class="step-cards">
+        {c.steps.map((step, i) => (
+          <li class="step-card">
+            <span class="step-card__num">{i + 1}</span>
+            <h3>{step.title}</h3>
+            <p>{step.text}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <CtaBand
+    image={{ src: images.pages.livestream.src, alt: images.pages.livestream.alt[locale] }}
+    eyebrow={c.ctaEyebrow}
+    title={c.ctaTitle}
+    text={c.ctaText}
+    href={dict.paths.livestream}
+    label={c.ctaLabel}
+  />
+</BaseLayout>

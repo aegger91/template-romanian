@@ -1,0 +1,144 @@
+---
+import type { Locale } from '../config/site';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import SectionHead from '../components/SectionHead.astro';
+import ContactForm from '../components/ContactForm.astro';
+import Icon from '../components/Icon.astro';
+import { siteConfig } from '../config/site';
+import { images } from '../config/images';
+import { t } from '../i18n/ui';
+import { p } from '../i18n/pages';
+import { crumbs } from './nav';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const dict = t(locale);
+const pg = p(locale);
+const c = pg.contact;
+const addr = siteConfig.address;
+const m = images.media;
+---
+<BaseLayout locale={locale} title={dict.contact.title} current="contact" description={c.lede}>
+  <PageHero
+    image={{ src: images.pages.contact.src, alt: images.pages.contact.alt[locale] }}
+    eyebrow={dict.nav.contact}
+    title={dict.contact.title}
+    lede={c.lede}
+    crumbs={crumbs(locale, [{ label: dict.nav.contact }])}
+    crumbLabel={pg.common.breadcrumb}
+  />
+
+  <section class="reveal section">
+    <div class="container split split--form">
+      <div>
+        <SectionHead eyebrow={c.infoEyebrow} title={c.infoTitle} />
+        <p class="lede">{c.infoText}</p>
+        <ul class="info-list">
+          <li>
+            <span class="info-list__icon"><Icon name="pin" size={20} /></span>
+            <span>
+              <span class="info-list__label">{dict.contact.address}</span>
+              <span class="info-list__value">{addr.street}<br />{addr.city}, {addr.region} {addr.postal}<br />{addr.country[locale]}</span>
+            </span>
+          </li>
+          <li>
+            <span class="info-list__icon"><Icon name="phone" size={20} /></span>
+            <span>
+              <span class="info-list__label">{dict.contact.phone}</span>
+              <a class="info-list__value" href={`tel:${siteConfig.phone.replace(/\D/g, '')}`}>{siteConfig.phone}</a>
+            </span>
+          </li>
+          <li>
+            <span class="info-list__icon"><Icon name="mail" size={20} /></span>
+            <span>
+              <span class="info-list__label">{dict.contact.email}</span>
+              <a class="info-list__value" href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a>
+            </span>
+          </li>
+          {siteConfig.features.visitingBlock && (
+            <li>
+              <span class="info-list__icon"><Icon name="clock" size={20} /></span>
+              <span>
+                <span class="info-list__label">{dict.contact.hours}</span>
+                <span class="info-list__value">{dict.contact.hoursText}</span>
+              </span>
+            </li>
+          )}
+        </ul>
+      </div>
+      <div class="card card--gold form-card">
+        <h2 class="form-card__title">{dict.contact.formTitle}</h2>
+        <ContactForm locale={locale} />
+      </div>
+    </div>
+  </section>
+
+  <section class="reveal section section--band">
+    <div class="container split split--map">
+      <div class="map-card">
+        <svg class="map-card__art" viewBox="0 0 640 440" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+          <rect width="640" height="440" fill="#efe6d6" />
+          <rect x="60" y="40" width="170" height="120" rx="6" fill="#e4d7c2" />
+          <rect x="270" y="40" width="130" height="120" rx="6" fill="#e4d7c2" />
+          <rect x="440" y="40" width="160" height="120" rx="6" fill="#dfe6d4" />
+          <rect x="60" y="200" width="170" height="200" rx="6" fill="#e4d7c2" />
+          <rect x="270" y="200" width="130" height="90" rx="6" fill="#e9dcc6" />
+          <rect x="440" y="200" width="160" height="200" rx="6" fill="#e4d7c2" />
+          <rect x="270" y="320" width="130" height="80" rx="6" fill="#dfe6d4" />
+          <path d="M0 180h640M250 0v440M420 0v440" stroke="#fffcf7" stroke-width="22" />
+          <path d="M0 330C160 300 300 420 640 360" stroke="#fffcf7" stroke-width="14" fill="none" />
+          <path d="M0 180h640M250 0v440M420 0v440" stroke="#d2c2a8" stroke-width="1" stroke-dasharray="6 10" />
+          <circle cx="335" cy="245" r="40" fill="#6b1d24" fill-opacity="0.12" />
+        </svg>
+        <span class="map-card__pin" aria-hidden="true">
+          <img src="/icons/cross-trefoil.svg" alt="" width="18" height="18" />
+        </span>
+        <p class="map-card__note">{c.mapNote}</p>
+      </div>
+      <div>
+        <SectionHead eyebrow={c.directionsEyebrow} title={c.directionsTitle} />
+        <p class="info-line"><Icon name="pin" size={18} />{addr.street}, {addr.city}</p>
+        <div class="btn-row btn-row--tight">
+          <a class="btn btn-accent btn-sm" href={siteConfig.maps.google} target="_blank" rel="noopener noreferrer">{c.openGoogle}</a>
+          <a class="btn btn-secondary btn-sm" href={siteConfig.maps.apple} target="_blank" rel="noopener noreferrer">{c.openApple}</a>
+          <a class="btn btn-secondary btn-sm" href={siteConfig.maps.osm} target="_blank" rel="noopener noreferrer">{c.openOsm}</a>
+        </div>
+        <ul class="info-tiles info-tiles--stack">
+          {c.directions.map((it) => (
+            <li class="info-tile">
+              <span class="info-tile__icon"><Icon name={it.icon} size={22} /></span>
+              <span>
+                <span class="info-tile__title">{it.title}</span>
+                <span class="info-tile__text">{it.text}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="reveal section">
+    <div class="container split">
+      <div>
+        <SectionHead eyebrow={c.hoursEyebrow} title={c.hoursTitle} />
+        <dl class="hours-table">
+          {c.hours.map((h) => (
+            <div class="hours-table__row">
+              <dt>{h.label}</dt>
+              <dd>{h.value}</dd>
+            </div>
+          ))}
+        </dl>
+        <a class="section-link" href={dict.paths.schedule}>{dict.schedule.title} →</a>
+      </div>
+      <figure class="media-frame media-frame--arch media-frame--caption">
+        <img src={m.dragomirna.src} alt={m.dragomirna.alt[locale]} width="1200" height="900" loading="lazy" />
+        <figcaption>{c.visitCaption}</figcaption>
+      </figure>
+    </div>
+  </section>
+</BaseLayout>
