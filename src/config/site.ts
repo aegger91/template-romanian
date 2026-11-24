@@ -49,16 +49,55 @@ export const siteConfig = {
     suggestedAmounts: [50, 100, 200, 500],
     currency: 'RON',
   },
+  /** Map links used on the contact page */
+  maps: {
+    google: 'https://www.google.com/maps/search/?api=1&query=Biserica%20Ortodoxa%20Cluj-Napoca',
+    apple: 'https://maps.apple.com/?q=Biserica%20Ortodoxa%20Cluj-Napoca',
+    osm: 'https://www.openstreetmap.org/search?query=Cluj-Napoca%20Biserica',
+  },
+  /** First entry is featured on the clergy page. Leave photo empty to show the placeholder portrait. */
   clergy: [
     {
       name: 'Pr. Ioan Popescu',
       role: { ro: 'Paroh', en: 'Parish Priest' },
-      photo: '/images/clergy-placeholder.webp',
+      bio: {
+        ro: 'Slujește în parohie din 2008. Text exemplu: adăugați aici o scurtă prezentare.',
+        en: 'Has served the parish since 2008. Sample text: add a short introduction here.',
+      },
+      email: 'paroh@parohie-exemplu.ro',
+      phone: '(026)-412-3456',
+      photo: '',
     },
     {
       name: 'Pr. Andrei Ionescu',
       role: { ro: 'Preot slujitor', en: 'Assistant Priest' },
-      photo: '/images/clergy-placeholder.webp',
+      bio: { ro: 'Slujește în parohie din 2019.', en: 'Has served the parish since 2019.' },
+      email: 'preot@parohie-exemplu.ro',
+      photo: '',
+    },
+    {
+      name: 'Diac. Mihai Stan',
+      role: { ro: 'Diacon', en: 'Deacon' },
+      bio: { ro: 'Slujește la Sfânta Liturghie de duminică.', en: 'Serves at the Sunday Divine Liturgy.' },
+      photo: '',
+    },
+    {
+      name: 'Ion Marin',
+      role: { ro: 'Cântăreț bisericesc', en: 'Cantor' },
+      bio: { ro: 'Conduce strana la toate slujbele.', en: 'Leads the chant at every service.' },
+      photo: '',
+    },
+    {
+      name: 'Elena Pop',
+      role: { ro: 'Dirijorul corului', en: 'Choir director' },
+      bio: { ro: 'Repetiții în fiecare joi, la ora 18:30.', en: 'Rehearsals every Thursday at 18:30.' },
+      photo: '',
+    },
+    {
+      name: 'Gheorghe Dumitru',
+      role: { ro: 'Epitrop', en: 'Churchwarden' },
+      bio: { ro: 'Se ocupă de administrarea parohiei.', en: 'Looks after parish administration.' },
+      photo: '',
     },
   ],
 } as const;

@@ -57,6 +57,46 @@ export const thisWeekServices: ScheduleItem[] = [...thisWeekServicesRaw].sort(
   (a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime),
 );
 
+const extraWeeklyServices: ScheduleItem[] = [
+  {
+    id: 'paraklesis-tue',
+    title: { ro: 'Paraclisul Maicii Domnului', en: 'Paraklesis to the Theotokos' },
+    description: { ro: 'Slujbă de rugăciune către Maica Domnului.', en: 'Service of supplication to the Theotokos.' },
+    date: nextWeekdayDate(2),
+    startTime: '18:00',
+    endTime: '18:40',
+  },
+  {
+    id: 'unction-thu',
+    title: { ro: 'Sfântul Maslu', en: 'Holy Unction' },
+    description: { ro: 'Taina Sfântului Maslu, pentru cei bolnavi.', en: 'The Sacrament of Holy Unction, for the sick.' },
+    date: nextWeekdayDate(4),
+    startTime: '18:00',
+    endTime: '19:00',
+  },
+  {
+    id: 'akathist-fri',
+    title: { ro: 'Acatistul Sf. Nicolae', en: 'Akathist to St Nicholas' },
+    description: { ro: 'Acatistul ocrotitorului parohiei.', en: 'Akathist to the patron of the parish.' },
+    date: nextWeekdayDate(5),
+    startTime: '18:00',
+    endTime: '18:45',
+  },
+  {
+    id: 'matins-sun',
+    title: { ro: 'Utrenia', en: 'Matins' },
+    description: { ro: 'Slujba de dimineață, înainte de Liturghie.', en: 'Morning service before the Liturgy.' },
+    date: nextWeekdayDate(0),
+    startTime: '07:30',
+    endTime: '09:00',
+  },
+];
+
+/** Fuller weekly pattern for the schedule page calendar */
+export const weeklyServices: ScheduleItem[] = [...thisWeekServicesRaw, ...extraWeeklyServices].sort(
+  (a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime),
+);
+
 export const nextFeast: ScheduleItem = {
   id: 'feast-nicholas',
   title: {
@@ -98,10 +138,22 @@ export const upcomingEvents: ScheduleItem[] = [
   },
 ].sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
 
-export const newsItems = [
+export type NewsItem = {
+  id: string;
+  date: string;
+  category: { ro: string; en: string };
+  image: string;
+  title: { ro: string; en: string };
+  summary: { ro: string; en: string };
+  body?: { ro: string; en: string };
+};
+
+export const newsItems: NewsItem[] = [
   {
     id: 'news-1',
     date: '2026-11-10',
+    category: { ro: 'Anunț', en: 'Notice' },
+    image: '/images/dragomirna.webp',
     title: {
       ro: 'Lucrări de întreținere la acoperiș',
       en: 'Roof maintenance works',
@@ -110,10 +162,16 @@ export const newsItems = [
       ro: 'În următoarele săptămâni se vor desfășura lucrări de reparație.',
       en: 'Repair works will take place over the coming weeks.',
     },
+    body: {
+      ro: 'Slujbele continuă după programul obișnuit. Intrarea se face pe ușa laterală până la finalul lucrărilor.',
+      en: 'Services continue as usual. Please use the side door until the works are finished.',
+    },
   },
   {
     id: 'news-2',
     date: '2026-11-01',
+    category: { ro: 'Parohie', en: 'Parish' },
+    image: '/images/candle-boxes.webp',
     title: {
       ro: 'Program special de pomeniri',
       en: 'Special memorial schedule',
@@ -126,6 +184,8 @@ export const newsItems = [
   {
     id: 'news-3',
     date: '2026-10-20',
+    category: { ro: 'Mulțumiri', en: 'Thanks' },
+    image: '/images/fresco-humor.webp',
     title: {
       ro: 'Mulțumiri pentru donatori',
       en: 'Thanks to donors',
@@ -135,7 +195,41 @@ export const newsItems = [
       en: 'We thank all who supported the parish this month.',
     },
   },
+  {
+    id: 'news-4',
+    date: '2026-10-04',
+    category: { ro: 'Cor', en: 'Choir' },
+    image: '/images/iconostasis-gold.webp',
+    title: {
+      ro: 'Corul parohiei își reia repetițiile',
+      en: 'The parish choir resumes rehearsals',
+    },
+    summary: {
+      ro: 'Repetițiile au loc în fiecare joi, la ora 18:30, în sala parohială.',
+      en: 'Rehearsals take place every Thursday at 18:30 in the parish hall.',
+    },
+  },
 ];
+
+/** Most recent past occurrence of a weekday (0=Sun … 6=Sat), before today */
+export function previousWeekdayDate(weekday: number, weeksBack = 0): string {
+  const d = new Date();
+  d.setHours(12, 0, 0, 0);
+  const diff = ((d.getDay() - weekday + 7) % 7) || 7;
+  d.setDate(d.getDate() - diff - weeksBack * 7);
+  return toISODate(d);
+}
+
+/** ISO dates for the next `count` days, starting today */
+export function nextDays(count: number): string[] {
+  const d = new Date();
+  d.setHours(12, 0, 0, 0);
+  return Array.from({ length: count }, (_, i) => {
+    const x = new Date(d);
+    x.setDate(d.getDate() + i);
+    return toISODate(x);
+  });
+}
 
 function pad(n: number) {
   return String(n).padStart(2, '0');
