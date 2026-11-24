@@ -4,7 +4,7 @@ import { readFileSync, existsSync, statSync } from 'fs';
 import { join, extname } from 'path';
 
 const dist = 'dist';
-const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon' };
+const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.woff2': 'font/woff2' };
 const server = createServer((req, res) => {
   let p = decodeURIComponent((req.url || '/').split('?')[0]);
   if (p.endsWith('/')) p += 'index.html';
@@ -19,7 +19,7 @@ const b = await chromium.launch();
 const out = [];
 const check = (name, ok, extra = '') => out.push(`${ok ? 'PASS' : 'FAIL'} ${name} ${extra}`);
 
-const inner = ['/parohie/', '/parohie/istoric/', '/parohie/cler/', '/parohie/galerie/', '/program/', '/program/taine/', '/stiri/', '/transmisie/', '/pomelnice/', '/donatii/', '/contact/',
+const inner = ['/', '/en/', '/parohie/', '/parohie/istoric/', '/parohie/cler/', '/parohie/galerie/', '/program/', '/program/taine/', '/stiri/', '/transmisie/', '/pomelnice/', '/donatii/', '/contact/',
   '/en/parish/', '/en/parish/history/', '/en/parish/clergy/', '/en/parish/gallery/', '/en/schedule/', '/en/schedule/sacraments/', '/en/news/', '/en/livestream/', '/en/commemoration/', '/en/donate/', '/en/contact/'];
 
 // JS off: every .reveal visible
@@ -46,7 +46,7 @@ for (const r of ['/parohie/istoric/', '/en/donate/']) {
 }
 
 // Schedule panels in every layout on the schedule page
-for (const r of ['/program/', '/en/schedule/', '/transmisie/', '/stiri/']) {
+for (const r of ['/', '/en/', '/program/', '/en/schedule/', '/transmisie/', '/stiri/']) {
   const p = await ctx.newPage();
   await p.goto(base + r);
   const roots = await p.$$('[data-schedule-root]');
@@ -56,7 +56,8 @@ for (const r of ['/program/', '/en/schedule/', '/transmisie/', '/stiri/']) {
     await btn.scrollIntoViewIfNeeded();
     await btn.click();
     await p.waitForTimeout(250);
-    const panel = await root.$('[data-schedule-panel]');
+    const uid = await root.getAttribute('data-schedule-root');
+    const panel = await p.$(`[data-panel-owner="${uid}"]`);
     const open = await panel.evaluate((e) => !e.hidden && e.classList.contains('is-open'));
     const ics = await panel.$eval('[data-panel-ics]', (a) => a.getAttribute('href') || '');
     const g = await panel.$eval('[data-panel-google]', (a) => a.getAttribute('href') || '');
@@ -131,16 +132,37 @@ for (const r of ['/program/taine/', '/en/schedule/sacraments/']) {
   await p.close();
 }
 
-// Mobile menu still works on an inner page
-const m = await b.newContext({ viewport: { width: 360, height: 800 } });
-for (const r of ['/parohie/cler/', '/en/schedule/sacraments/']) {
-  const p = await m.newPage();
-  await p.goto(base + r);
-  const toggle = await p.$('.nav-toggle, [data-nav-toggle], button[aria-controls]');
-  await toggle.click();
-  await p.waitForTimeout(400);
-  const expanded = await toggle.getAttribute('aria-expanded');
-  check(`mobile menu ${r}`, expanded === 'true', `expanded=${expanded}`);
+// Mobile menu opens with and without JS, and lists the inner pages
+for (const js of [true, false]) {
+  const m = await b.newContext({ viewport: { width: 360, height: 800 }, javaScriptEnabled: js });
+  for (const r of ['/parohie/cler/', '/en/schedule/sacraments/']) {
+    const p = await m.newPage();
+    await p.goto(base + r);
+    const toggle = await p.$('[data-mnav] > summary');
+    await toggle.click();
+    await p.waitForTimeout(300);
+    const open = await p.$eval('[data-mnav]', (d) => d.open);
+    const links = await p.$$eval('.mnav__panel a', (els) => els.filter((e) => e.getBoundingClientRect().height > 0).length);
+    const expanded = js ? await toggle.getAttribute('aria-expanded') : 'n/a';
+    check(`mobile menu ${js ? 'js' : 'no-js'} ${r}`, open && links >= 10 && (!js || expanded === 'true'), `open=${open} links=${links} expanded=${expanded}`);
+    if (js) {
+      await p.keyboard.press('Escape');
+      const closed = await p.$eval('[data-mnav]', (d) => !d.open);
+      check(`mobile menu escape ${r}`, closed, '');
+    }
+    await p.close();
+  }
+  await m.close();
+}
+
+// Desktop dropdown opens on keyboard focus
+{
+  const p = await ctx.newPage();
+  await p.goto(base + '/en/');
+  await p.focus('.mainnav__item:nth-child(2) > .mainnav__link');
+  await p.waitForTimeout(300);
+  const vis = await p.$eval('.mainnav__item:nth-child(2) > .mainnav__sub', (e) => getComputedStyle(e).visibility);
+  check('desktop dropdown on focus', vis === 'visible', vis);
   await p.close();
 }
 

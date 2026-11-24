@@ -104,6 +104,7 @@ for (const route of routes) {
         if (!el || el.nodeType !== 1) return true;
         if (el.closest('.skip-link, .sr-only, [hidden], .panel:not(.is-open), .panel-backdrop:not(.is-open)')) return true;
         if (el.hasAttribute('hidden') || el.getAttribute('aria-hidden') === 'true') return true;
+        if (el.closest('details:not([open])') && !el.closest('summary')) return true;
         const style = getComputedStyle(el);
         if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return true;
         // clipped intentionally for a11y
