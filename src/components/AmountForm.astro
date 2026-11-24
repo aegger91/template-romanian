@@ -2,6 +2,7 @@
 import type { Locale } from '../config/site';
 import { siteConfig } from '../config/site';
 import { t } from '../i18n/ui';
+import { p } from '../i18n/pages';
 
 interface Props {
   locale: Locale;
@@ -9,6 +10,7 @@ interface Props {
 }
 const { locale, kind } = Astro.props;
 const dict = t(locale);
+const pg = p(locale);
 const copy = kind === 'donate' ? dict.donate : dict.pomelnice;
 const amounts = siteConfig.donation.suggestedAmounts;
 const currency = siteConfig.donation.currency;
@@ -18,30 +20,97 @@ const showProgress =
   siteConfig.features.donationAutoCount;
 ---
 <form class="amount-form" data-amount-form novalidate>
-  <div class="form-success" data-form-success hidden>{copy.success}</div>
+  <div class="form-success" data-form-success hidden tabindex="-1">{copy.success}</div>
 
   {kind === 'pomelnice' && (
     <>
-      <div class="field">
-        <label for="living">{copy.living}</label>
-        <textarea id="living" name="living" rows="4"></textarea>
+      <div class="names-grid">
+        <div class="field names-card names-card--living">
+          <label for="living">
+            <span class="names-card__cross" aria-hidden="true"><img src="/icons/cross-trefoil.svg" alt="" width="14" height="14" /></span>
+            {copy.living}
+          </label>
+          <textarea id="living" name="living" rows="6" placeholder={dict.pomelnice.names}></textarea>
+        </div>
+        <div class="field names-card names-card--departed">
+          <label for="departed">
+            <span class="names-card__cross" aria-hidden="true"><img src="/icons/cross-trefoil.svg" alt="" width="14" height="14" /></span>
+            {copy.departed}
+          </label>
+          <textarea id="departed" name="departed" rows="6" placeholder={dict.pomelnice.names}></textarea>
+        </div>
       </div>
-      <div class="field">
-        <label for="departed">{copy.departed}</label>
-        <textarea id="departed" name="departed" rows="4"></textarea>
-      </div>
+
+      <fieldset class="field option-set">
+        <legend class="field-legend">{pg.pomelnice.service}</legend>
+        <div class="option-grid">
+          {pg.pomelnice.services.map((s, i) => (
+            <label class="option-card">
+              <input type="radio" name="service" value={s.id} checked={i === 0} />
+              <span class="option-card__body">
+                <span class="option-card__title">{s.label}</span>
+                <span class="option-card__note">{s.note}</span>
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
     </>
   )}
 
   {kind === 'donate' && (
+    <fieldset class="field option-set">
+      <legend class="field-legend">{pg.donate.frequency}</legend>
+      <div class="segmented">
+        <label><input type="radio" name="frequency" value="once" checked /><span>{pg.donate.once}</span></label>
+        <label><input type="radio" name="frequency" value="monthly" /><span>{pg.donate.monthly}</span></label>
+      </div>
+    </fieldset>
+  )}
+
+  <fieldset class="field option-set">
+    <legend class="field-legend">{copy.amount} ({currency})</legend>
+    <p class="form-note" style="margin:0 0 0.55rem;">{copy.suggested}</p>
+    <div class="chip-row chip-row--amounts" role="group" aria-label={copy.suggested}>
+      {amounts.map((n) => (
+        <button type="button" class="chip chip--amount" data-amount-chip={n} aria-pressed="false">{n} {currency}</button>
+      ))}
+    </div>
+    <label for={`amount-free-${kind}`} class="field-sub">{copy.freeAmount}</label>
+    <div class="amount-input">
+      <input
+        id={`amount-free-${kind}`}
+        name="amount"
+        type="number"
+        min="0"
+        step="1"
+        value="0"
+        inputmode="decimal"
+        data-amount-input
+        aria-describedby={`amount-help-${kind}`}
+      />
+      <span class="amount-input__unit" aria-hidden="true">{currency}</span>
+    </div>
+    <p id={`amount-help-${kind}`} class="form-note">{copy.freeAmount}: {locale === 'ro' ? 'orice sumă, de la 0' : 'any amount, from 0'}.</p>
+  </fieldset>
+
+  {kind === 'donate' && (
     <>
       <div class="field">
-        <label for="donor-name">{dict.donate.name}</label>
-        <input id="donor-name" name="name" type="text" autocomplete="name" />
+        <label for="donate-purpose">{pg.donate.purpose}</label>
+        <select id="donate-purpose" name="purpose">
+          {pg.donate.purposes.map((o) => <option>{o}</option>)}
+        </select>
       </div>
-      <div class="field">
-        <label for="donor-email">{dict.donate.email}</label>
-        <input id="donor-email" name="email" type="email" autocomplete="email" />
+      <div class="field-row">
+        <div class="field">
+          <label for="donor-name">{dict.donate.name}</label>
+          <input id="donor-name" name="name" type="text" autocomplete="name" />
+        </div>
+        <div class="field">
+          <label for="donor-email">{dict.donate.email}</label>
+          <input id="donor-email" name="email" type="email" autocomplete="email" />
+        </div>
       </div>
       <div class="field">
         <label for="donor-message">{dict.donate.message}</label>
@@ -50,30 +119,18 @@ const showProgress =
     </>
   )}
 
-  <fieldset class="field" style="border:0;padding:0;margin:0 0 1rem;">
-    <legend style="font-family:var(--font-ui);font-size:0.9rem;font-weight:600;color:var(--ink-muted);margin-bottom:0.5rem;">
-      {copy.amount} ({currency})
-    </legend>
-    <p class="form-note" style="margin-top:0;">{copy.suggested}</p>
-    <div class="chip-row" role="group" aria-label={copy.suggested}>
-      {amounts.map((n) => (
-        <button type="button" class="chip" data-amount-chip={n} aria-pressed="false">{n}</button>
-      ))}
+  {kind === 'pomelnice' && (
+    <div class="field-row">
+      <div class="field">
+        <label for="pom-name">{pg.pomelnice.yourName}</label>
+        <input id="pom-name" name="name" type="text" autocomplete="name" />
+      </div>
+      <div class="field">
+        <label for="pom-email">{pg.pomelnice.yourEmail}</label>
+        <input id="pom-email" name="email" type="email" autocomplete="email" />
+      </div>
     </div>
-    <label for="amount-free" class="sr-only">{copy.freeAmount}</label>
-    <input
-      id="amount-free"
-      name="amount"
-      type="number"
-      min="0"
-      step="1"
-      value="0"
-      inputmode="decimal"
-      data-amount-input
-      aria-describedby="amount-help"
-    />
-    <p id="amount-help" class="form-note">{copy.freeAmount} (min 0)</p>
-  </fieldset>
+  )}
 
   {showProgress && (
     <div>
@@ -82,39 +139,53 @@ const showProgress =
     </div>
   )}
 
-  <button type="submit" class="btn btn-primary">{copy.submit}</button>
-  <p class="form-note">{copy.note}</p>
+  <div class="amount-form__submit">
+    <button type="submit" class="btn btn-primary btn-wide">
+      {copy.submit}
+      <span class="amount-form__total">· <span data-amount-display>0</span> {currency}</span>
+    </button>
+    <p class="form-note">{copy.note}</p>
+  </div>
 </form>
 
 <script>
-  document.querySelectorAll('[data-amount-form]').forEach((form) => {
-    const input = form.querySelector('[data-amount-input]');
+  document.querySelectorAll<HTMLFormElement>('[data-amount-form]').forEach((form) => {
+    const input = form.querySelector<HTMLInputElement>('[data-amount-input]');
     const chips = form.querySelectorAll('[data-amount-chip]');
-    const success = form.querySelector('[data-form-success]');
+    const success = form.querySelector<HTMLElement>('[data-form-success]');
+    const display = form.querySelector('[data-amount-display]');
 
-    chips.forEach((chip) => {
-      chip.addEventListener('click', () => {
-        const value = chip.getAttribute('data-amount-chip') || '0';
-        if (input) input.value = value;
-        chips.forEach((c) => c.setAttribute('aria-pressed', c === chip ? 'true' : 'false'));
-      });
-    });
-
-    input?.addEventListener('input', () => {
+    const sync = () => {
+      if (!input) return;
+      const value = Number(input.value);
+      if (input.value !== '' && (Number.isNaN(value) || value < 0)) input.value = '0';
+      if (display) display.textContent = input.value === '' ? '0' : String(Math.max(0, Number(input.value)));
       chips.forEach((c) => {
         c.setAttribute('aria-pressed', c.getAttribute('data-amount-chip') === input.value ? 'true' : 'false');
       });
-      if (Number(input.value) < 0) input.value = '0';
+    };
+
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        if (!input) return;
+        const value = chip.getAttribute('data-amount-chip') || '0';
+        input.value = input.value === value ? '0' : value;
+        sync();
+      });
     });
+
+    input?.addEventListener('input', sync);
 
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       if (input && (input.value === '' || Number(input.value) < 0)) input.value = '0';
-      success.hidden = false;
-      success.focus?.();
+      if (success) {
+        success.hidden = false;
+        success.focus();
+      }
       form.reset();
       if (input) input.value = '0';
-      chips.forEach((c) => c.setAttribute('aria-pressed', 'false'));
+      sync();
     });
   });
 </script>

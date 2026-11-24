@@ -1,0 +1,30 @@
+---
+import Ornament from './Ornament.astro';
+
+interface Props {
+  image: { src: string; alt: string };
+  eyebrow: string;
+  title: string;
+  text: string;
+  href: string;
+  label: string;
+  secondary?: { href: string; label: string };
+}
+const { image, eyebrow, title, text, href, label, secondary } = Astro.props;
+---
+<section class="donate-band cta-band">
+  <div class="donate-band__media">
+    <img src={image.src} alt={image.alt} width="1920" height="960" loading="lazy" />
+  </div>
+  <div class="donate-band__shade"></div>
+  <div class="container donate-band__content">
+    <p class="eyebrow" style="color:var(--gold-bright);">{eyebrow}</p>
+    <h2 style="color:var(--white);">{title}</h2>
+    <Ornament light />
+    <p class="cta-band__text">{text}</p>
+    <div class="hero__actions">
+      <a class="btn btn-gold" href={href}>{label}</a>
+      {secondary && <a class="btn btn-ghost" href={secondary.href}>{secondary.label}</a>}
+    </div>
+  </div>
+</section>

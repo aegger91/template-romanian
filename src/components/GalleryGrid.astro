@@ -1,0 +1,104 @@
+---
+import type { Locale } from '../config/site';
+import { galleryItems } from '../config/gallery';
+import { p } from '../i18n/pages';
+import Icon from './Icon.astro';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const pg = p(locale);
+const g = pg.gallery;
+const cats = ['all', 'churches', 'frescoes', 'icons', 'details'] as const;
+---
+<div class="gallery" data-gallery>
+  <div class="chip-row gallery__filters js-only" role="group" aria-label={g.filterLabel}>
+    {cats.map((c, i) => (
+      <button type="button" class="chip" data-filter={c} aria-pressed={i === 0 ? 'true' : 'false'}>{g.filters[c]}</button>
+    ))}
+  </div>
+  <ul class="masonry" role="list">
+    {galleryItems.map((item, i) => (
+      <li class="masonry__item" data-category={item.category}>
+        <a class="masonry__link" href={item.src} data-lightbox-index={i}>
+          <img src={item.src} alt={item.alt[locale]} width={item.w} height={item.h} loading="lazy" />
+          <span class="masonry__cap">
+            <span class="masonry__tag">{g.filters[item.category]}</span>
+            <span>{item.alt[locale]}</span>
+          </span>
+          <span class="masonry__zoom" aria-hidden="true"><Icon name="expand" size={16} /></span>
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <dialog class="lightbox" data-lightbox aria-label={g.gridTitle}>
+    <figure class="lightbox__figure">
+      <img data-lightbox-img alt="" />
+      <figcaption data-lightbox-cap></figcaption>
+    </figure>
+    <button type="button" class="lightbox__btn lightbox__close" data-lightbox-close aria-label={pg.common.close}><Icon name="x" size={22} /></button>
+    <button type="button" class="lightbox__btn lightbox__prev" data-lightbox-prev aria-label={pg.common.previous}><Icon name="chevron-left" size={24} /></button>
+    <button type="button" class="lightbox__btn lightbox__next" data-lightbox-next aria-label={pg.common.next}><Icon name="chevron-right" size={24} /></button>
+  </dialog>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-gallery]').forEach((root) => {
+    const chips = root.querySelectorAll<HTMLButtonElement>('[data-filter]');
+    const items = Array.from(root.querySelectorAll<HTMLElement>('.masonry__item'));
+    const links = Array.from(root.querySelectorAll<HTMLAnchorElement>('[data-lightbox-index]'));
+    const dialog = root.querySelector<HTMLDialogElement>('[data-lightbox]');
+    const img = root.querySelector<HTMLImageElement>('[data-lightbox-img]');
+    const cap = root.querySelector<HTMLElement>('[data-lightbox-cap]');
+    let current = 0;
+
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const f = chip.dataset.filter;
+        chips.forEach((c) => c.setAttribute('aria-pressed', c === chip ? 'true' : 'false'));
+        items.forEach((it) => {
+          it.hidden = !(f === 'all' || it.dataset.category === f);
+        });
+      });
+    });
+
+    const visible = () => links.filter((l) => !(l.closest('.masonry__item') as HTMLElement).hidden);
+
+    function show(link: HTMLAnchorElement) {
+      const pic = link.querySelector('img');
+      if (!img || !pic) return;
+      img.src = link.href;
+      img.alt = pic.alt;
+      if (cap) cap.textContent = pic.alt;
+      current = visible().indexOf(link);
+    }
+
+    function step(dir: number) {
+      const list = visible();
+      if (!list.length) return;
+      show(list[(current + dir + list.length) % list.length]);
+    }
+
+    if (!dialog || typeof dialog.showModal !== 'function') return;
+
+    links.forEach((link) => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        show(link);
+        dialog.showModal();
+      });
+    });
+    root.querySelector('[data-lightbox-close]')?.addEventListener('click', () => dialog.close());
+    root.querySelector('[data-lightbox-prev]')?.addEventListener('click', () => step(-1));
+    root.querySelector('[data-lightbox-next]')?.addEventListener('click', () => step(1));
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+    dialog.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') step(-1);
+      if (e.key === 'ArrowRight') step(1);
+    });
+  });
+</script>

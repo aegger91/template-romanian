@@ -1,0 +1,30 @@
+---
+import type { Locale } from '../config/site';
+import { p } from '../i18n/pages';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const n = p(locale).news;
+---
+<form class="newsletter" data-newsletter novalidate>
+  <label for="newsletter-email" class="sr-only">{n.newsletterLabel}</label>
+  <input id="newsletter-email" name="email" type="email" autocomplete="email" placeholder={n.newsletterLabel} required />
+  <button type="submit" class="btn btn-gold">{n.newsletterCta}</button>
+  <p class="newsletter__success" data-form-success hidden tabindex="-1">{n.newsletterSuccess}</p>
+</form>
+
+<script>
+  document.querySelectorAll<HTMLFormElement>('[data-newsletter]').forEach((form) => {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const success = form.querySelector<HTMLElement>('[data-form-success]');
+      if (success) {
+        success.hidden = false;
+        success.focus();
+      }
+      form.reset();
+    });
+  });
+</script>

@@ -1,0 +1,32 @@
+---
+interface Item {
+  href: string;
+  label: string;
+  current?: boolean;
+}
+interface Props {
+  items: Item[];
+  label: string;
+}
+const { items, label } = Astro.props;
+---
+<nav class="subnav" aria-label={label}>
+  <div class="container">
+    <ul class="subnav__list">
+      {items.map((item) => (
+        <li>
+          <a href={item.href} aria-current={item.current ? 'page' : undefined}>{item.label}</a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</nav>
+<script>
+  document.querySelectorAll<HTMLElement>('.subnav__list').forEach((list) => {
+    const active = list.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!active || list.scrollWidth <= list.clientWidth) return;
+    const li = active.parentElement as HTMLElement;
+    const target = li.offsetLeft - (list.clientWidth - li.offsetWidth) / 2;
+    list.scrollLeft = Math.max(0, target);
+  });
+</script>

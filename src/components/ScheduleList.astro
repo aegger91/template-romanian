@@ -2,31 +2,44 @@
 import type { Locale } from '../config/site';
 import { siteConfig } from '../config/site';
 import type { ScheduleItem } from '../config/schedule';
+import { nextDays } from '../config/schedule';
 import { t } from '../i18n/ui';
 import { displayDates, formatShortDate, buildIcs, googleCalendarUrl } from '../utils/dates';
+import Icon from './Icon.astro';
 
 interface Props {
   locale: Locale;
   items: ScheduleItem[];
-  layout?: 'week' | 'list';
+  layout?: 'week' | 'list' | 'calendar' | 'compact';
+  /** compact layout: label rows by weekday instead of date */
+  weekly?: boolean;
+  labels?: { today: string; empty: string };
 }
-const { locale, items, layout = 'list' } = Astro.props;
+const { locale, items, layout = 'list', weekly = false, labels } = Astro.props;
 const dict = t(locale);
 const parish = siteConfig.name[locale];
+const tag = locale === 'ro' ? 'ro-RO' : 'en-GB';
+const uid = `sch-${Math.random().toString(36).slice(2, 8)}`;
+
+const toDate = (iso: string) => {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(y, m - 1, d, 12);
+};
 
 const payload = items.map((item) => {
   const dates = displayDates(item.date, locale);
-  const [y, m, d] = item.date.split('-').map(Number);
-  const dt = new Date(y, m - 1, d, 12);
-  const dayName = dt.toLocaleDateString(locale === 'ro' ? 'ro-RO' : 'en-GB', { weekday: 'short' });
+  const dt = toDate(item.date);
   return {
     id: item.id,
+    date: item.date,
     title: item.title[locale],
     description: item.description[locale],
     dateLabel: dates.primary,
     shortDate: formatShortDate(item.date, locale),
-    dayNum: String(d),
-    dayName,
+    dayNum: String(dt.getDate()),
+    dayName: dt.toLocaleDateString(tag, { weekday: 'short' }),
+    weekdayLong: dt.toLocaleDateString(tag, { weekday: 'long' }),
+    monthShort: dt.toLocaleDateString(tag, { month: 'short' }),
     oldStyleLabel: dates.secondary,
     time: `${item.startTime}-${item.endTime}`,
     location: item.location?.[locale] ?? parish,
@@ -35,9 +48,26 @@ const payload = items.map((item) => {
     map: siteConfig.mapUrl,
   };
 });
+
+const today = nextDays(1)[0];
+const calendarDays =
+  layout === 'calendar'
+    ? nextDays(7).map((iso) => {
+        const dt = toDate(iso);
+        return {
+          iso,
+          isToday: iso === today,
+          dow: dt.toLocaleDateString(tag, { weekday: 'short' }),
+          dowLong: dt.toLocaleDateString(tag, { weekday: 'long' }),
+          num: String(dt.getDate()),
+          month: dt.toLocaleDateString(tag, { month: 'short' }),
+          items: payload.filter((p) => p.date === iso),
+        };
+      })
+    : [];
 ---
-<div data-schedule-root>
-  {layout === 'week' ? (
+<div data-schedule-root={uid}>
+  {layout === 'week' && (
     <div class="schedule-week">
       {payload.map((item) => (
         <button type="button" class="schedule-card" data-schedule-open={item.id} aria-haspopup="dialog">
@@ -49,20 +79,68 @@ const payload = items.map((item) => {
         </button>
       ))}
     </div>
-  ) : (
-    <ul class="schedule-list">
+  )}
+
+  {layout === 'calendar' && (
+    <div class="wcal">
+      {calendarDays.map((day) => (
+        <div class:list={['wcal__day', day.isToday && 'is-today', day.items.length === 0 && 'is-empty']}>
+          <div class="wcal__head">
+            <span class="wcal__dow" title={day.dowLong}>{day.dow}</span>
+            <span class="wcal__num">{day.num}</span>
+            <span class="wcal__mon">{day.month}</span>
+            {day.isToday && labels && <span class="wcal__today">{labels.today}</span>}
+          </div>
+          <div class="wcal__items">
+            {day.items.map((item) => (
+              <button type="button" class="wcal__item" data-schedule-open={item.id} aria-haspopup="dialog">
+                <span class="wcal__time">{item.time}</span>
+                <span class="wcal__title">{item.title}</span>
+                {item.oldStyleLabel && <span class="wcal__old">{dict.schedule.oldStyleLabel}: {item.oldStyleLabel}</span>}
+              </button>
+            ))}
+            {day.items.length === 0 && labels && <p class="wcal__empty">{labels.empty}</p>}
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+
+  {layout === 'list' && (
+    <ul class="schedule-list schedule-list--rich">
       {payload.map((item) => (
         <li>
-          <button type="button" class="schedule-item" data-schedule-open={item.id} aria-haspopup="dialog">
-            <div class="schedule-item__meta">
-              <span>{item.dateLabel}</span>
-              <span>{item.time}</span>
-              {item.oldStyleLabel && (
-                <span class="old-style">{dict.schedule.oldStyleLabel}: {item.oldStyleLabel}</span>
-              )}
-            </div>
-            <h3>{item.title}</h3>
-            <p style="margin:0;color:var(--ink-2);">{item.description}</p>
+          <button type="button" class="schedule-item schedule-item--rich" data-schedule-open={item.id} aria-haspopup="dialog">
+            <span class="date-tile" aria-hidden="true">
+              <span class="date-tile__day">{item.dayNum}</span>
+              <span class="date-tile__mon">{item.monthShort}</span>
+            </span>
+            <span class="schedule-item__body">
+              <span class="schedule-item__meta">
+                <span>{item.dateLabel}</span>
+                <span>{item.time}</span>
+                {item.oldStyleLabel && (
+                  <span class="old-style">{dict.schedule.oldStyleLabel}: {item.oldStyleLabel}</span>
+                )}
+              </span>
+              <span class="schedule-item__title">{item.title}</span>
+              <span class="schedule-item__desc">{item.description}</span>
+            </span>
+            <span class="schedule-item__go" aria-hidden="true"><Icon name="arrow" size={18} /></span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  )}
+
+  {layout === 'compact' && (
+    <ul class="sched-rows">
+      {payload.map((item) => (
+        <li>
+          <button type="button" class="sched-row" data-schedule-open={item.id} aria-haspopup="dialog">
+            <span class="sched-row__when">{weekly ? item.weekdayLong : item.shortDate}</span>
+            <span class="sched-row__time">{item.time}</span>
+            <span class="sched-row__title">{item.title}</span>
           </button>
         </li>
       ))}
@@ -70,11 +148,11 @@ const payload = items.map((item) => {
   )}
 
   <div class="panel-backdrop" data-panel-backdrop hidden></div>
-  <aside class="panel" data-schedule-panel role="dialog" aria-modal="true" aria-labelledby="schedule-panel-title" hidden>
+  <aside class="panel" data-schedule-panel role="dialog" aria-modal="true" aria-labelledby={`${uid}-title`} hidden>
     <div class="panel__header">
       <div>
         <p class="eyebrow" style="margin:0 0 0.35rem;">{dict.schedule.addToCalendar}</p>
-        <h2 id="schedule-panel-title" data-panel-title style="margin:0;font-size:1.4rem;"></h2>
+        <h2 id={`${uid}-title`} data-panel-title style="margin:0;font-size:1.4rem;"></h2>
       </div>
       <button type="button" class="btn btn-secondary" data-panel-close>{dict.schedule.close}</button>
     </div>
@@ -93,8 +171,8 @@ const payload = items.map((item) => {
   </aside>
 </div>
 
-<script define:vars={{ payload }}>
-  const root = document.querySelector('[data-schedule-root]');
+<script define:vars={{ payload, uid }}>
+  const root = document.querySelector(`[data-schedule-root="${uid}"]`);
   if (root) {
     const byId = Object.fromEntries(payload.map((p) => [p.id, p]));
     const panel = root.querySelector('[data-schedule-panel]');
@@ -109,10 +187,12 @@ const payload = items.map((item) => {
     const ics = root.querySelector('[data-panel-ics]');
     const google = root.querySelector('[data-panel-google]');
     const map = root.querySelector('[data-panel-map]');
+    let opener = null;
 
-    function openPanel(id) {
+    function openPanel(id, btn) {
       const item = byId[id];
       if (!item || !panel) return;
+      opener = btn;
       title.textContent = item.title;
       desc.textContent = item.description;
       date.textContent = item.dateLabel;
@@ -139,16 +219,18 @@ const payload = items.map((item) => {
     }
 
     function closePanel() {
-      panel?.classList.remove('is-open');
+      if (!panel || panel.hidden) return;
+      panel.classList.remove('is-open');
       backdrop?.classList.remove('is-open');
       setTimeout(() => {
-        if (panel) panel.hidden = true;
+        panel.hidden = true;
         if (backdrop) backdrop.hidden = true;
       }, 250);
+      opener?.focus();
     }
 
     root.querySelectorAll('[data-schedule-open]').forEach((btn) => {
-      btn.addEventListener('click', () => openPanel(btn.getAttribute('data-schedule-open')));
+      btn.addEventListener('click', () => openPanel(btn.getAttribute('data-schedule-open'), btn));
     });
     root.querySelector('[data-panel-close]')?.addEventListener('click', closePanel);
     backdrop?.addEventListener('click', closePanel);

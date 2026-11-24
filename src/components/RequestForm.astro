@@ -1,0 +1,82 @@
+---
+import type { Locale } from '../config/site';
+import { p } from '../i18n/pages';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const pg = p(locale).sacraments;
+const f = pg.fields;
+---
+<form class="request-form" data-request-form novalidate id="cerere-form">
+  <div class="form-success" data-form-success hidden tabindex="-1">{f.success}</div>
+  <div class="field">
+    <label for="req-service">{f.service}</label>
+    <select id="req-service" name="service" data-request-service>
+      {pg.items.filter((i) => !('href' in i)).map((i) => <option value={i.id}>{i.title}</option>)}
+    </select>
+  </div>
+  <div class="field-row">
+    <div class="field">
+      <label for="req-name">{f.name}</label>
+      <input id="req-name" name="name" type="text" autocomplete="name" required />
+    </div>
+    <div class="field">
+      <label for="req-phone">{f.phone}</label>
+      <input id="req-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(000)-000-0000" data-phone-mask />
+    </div>
+  </div>
+  <div class="field-row">
+    <div class="field">
+      <label for="req-email">{f.email}</label>
+      <input id="req-email" name="email" type="email" autocomplete="email" />
+    </div>
+    <div class="field">
+      <label for="req-date">{f.date}</label>
+      <input id="req-date" name="date" type="date" />
+    </div>
+  </div>
+  <div class="field">
+    <label for="req-message">{f.message}</label>
+    <textarea id="req-message" name="message" rows="4"></textarea>
+  </div>
+  <button type="submit" class="btn btn-primary btn-wide">{f.submit}</button>
+  <p class="form-note">{f.note}</p>
+</form>
+
+<script>
+  function maskPhone(value: string) {
+    const digits = value.replace(/\D/g, '').slice(0, 10);
+    const a = digits.slice(0, 3);
+    const b = digits.slice(3, 6);
+    const c = digits.slice(6, 10);
+    if (digits.length <= 3) return a.length ? `(${a}` + (digits.length === 3 ? ')-' : '') : '';
+    if (digits.length <= 6) return `(${a})-${b}`;
+    return `(${a})-${b}-${c}`;
+  }
+
+  document.querySelectorAll<HTMLFormElement>('[data-request-form]').forEach((form) => {
+    form.querySelectorAll<HTMLInputElement>('[data-phone-mask]').forEach((input) => {
+      input.addEventListener('input', () => {
+        input.value = maskPhone(input.value);
+      });
+    });
+    const select = form.querySelector<HTMLSelectElement>('[data-request-service]');
+    document.querySelectorAll<HTMLAnchorElement>('[data-request-pick]').forEach((link) => {
+      link.addEventListener('click', () => {
+        const id = link.getAttribute('data-request-pick');
+        if (select && id) select.value = id;
+      });
+    });
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const success = form.querySelector<HTMLElement>('[data-form-success]');
+      if (success) {
+        success.hidden = false;
+        success.focus();
+      }
+      form.reset();
+    });
+  });
+</script>

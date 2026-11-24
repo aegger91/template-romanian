@@ -1,0 +1,52 @@
+---
+import Ornament from './Ornament.astro';
+
+interface Crumb {
+  label: string;
+  href?: string;
+}
+interface Props {
+  image: { src: string; alt: string };
+  title: string;
+  eyebrow?: string;
+  lede?: string;
+  crumbs: Crumb[];
+  crumbLabel: string;
+  icon?: { src: string; alt: string };
+  position?: string;
+}
+const { image, title, eyebrow, lede, crumbs, crumbLabel, icon, position = 'center' } = Astro.props;
+---
+<header class:list={['phero', icon && 'phero--icon']}>
+  <div class="phero__media">
+    <img src={image.src} alt={image.alt} width="1920" height="960" fetchpriority="high" style={`object-position:${position};`} />
+  </div>
+  <div class="phero__shade"></div>
+  <div class="container phero__inner">
+    <div class="phero__content">
+      <nav class="crumbs" aria-label={crumbLabel}>
+        <ol>
+          {crumbs.map((c, i) => (
+            <li>
+              {c.href && i < crumbs.length - 1 ? <a href={c.href}>{c.label}</a> : <span aria-current="page">{c.label}</span>}
+            </li>
+          ))}
+        </ol>
+      </nav>
+      {eyebrow && <p class="eyebrow phero__eyebrow">{eyebrow}</p>}
+      <h1 class="phero__title">{title}</h1>
+      <Ornament light />
+      {lede && <p class="phero__lede">{lede}</p>}
+      <slot />
+    </div>
+    {icon && (
+      <figure class="phero__icon">
+        <span class="phero__icon-cross" aria-hidden="true">
+          <img src="/icons/cross-trefoil.svg" alt="" width="18" height="18" />
+        </span>
+        <img src={icon.src} alt={icon.alt} width="900" height="1200" />
+      </figure>
+    )}
+  </div>
+  <div class="hero__floor" aria-hidden="true"><span class="hero__floor-rule"></span></div>
+</header>
