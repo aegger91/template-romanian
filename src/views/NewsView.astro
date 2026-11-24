@@ -1,11 +1,11 @@
 ---
 import type { Locale } from '../config/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PageHero from '../components/PageHero.astro';
-import SectionHead from '../components/SectionHead.astro';
+import PageBanner from '../components/PageBanner.astro';
+import Heading from '../components/Heading.astro';
+import Motif from '../components/Motif.astro';
 import ScheduleList from '../components/ScheduleList.astro';
 import NewsletterForm from '../components/NewsletterForm.astro';
-import Ornament from '../components/Ornament.astro';
 import Icon from '../components/Icon.astro';
 import { siteConfig } from '../config/site';
 import { images } from '../config/images';
@@ -26,7 +26,7 @@ const [featured, ...rest] = newsItems;
 const calendarLabel = siteConfig.calendarStyle === 'old' ? dict.schedule.calendarOld : dict.schedule.calendarNew;
 ---
 <BaseLayout locale={locale} title={dict.news.title} current="news" description={n.lede}>
-  <PageHero
+  <PageBanner
     image={{ src: images.pages.news.src, alt: images.pages.news.alt[locale] }}
     eyebrow={dict.nav.news}
     title={dict.news.title}
@@ -35,41 +35,43 @@ const calendarLabel = siteConfig.calendarStyle === 'old' ? dict.schedule.calenda
     crumbLabel={pg.common.breadcrumb}
   />
 
-  <section class="reveal section">
-    <div class="container">
-      <article class="feature-story">
-        <div class="feature-story__media">
+  <section class="section">
+    <div class="container reveal">
+      <article class="feature feature--story">
+        <div class="feature__media">
           <img src={featured.image} alt="" width="1200" height="900" loading="lazy" />
         </div>
-        <div class="feature-story__body">
-          <p class="feature-story__meta">
+        <div class="feature__body">
+          <div class="meta-row">
             <span class="tag tag--gold">{n.featuredEyebrow}</span>
             <span class="tag">{featured.category[locale]}</span>
             <time datetime={featured.date}>{formatShortDate(featured.date, locale)}</time>
-          </p>
+          </div>
           <h2>{featured.title[locale]}</h2>
-          <Ornament />
+          <Motif />
           <p class="lede">{featured.summary[locale]}</p>
-          {featured.body && <p>{featured.body[locale]}</p>}
+          {featured.body && <p style="color:var(--ink-2)">{featured.body[locale]}</p>}
         </div>
       </article>
     </div>
   </section>
 
-  <section class="reveal section section--band">
-    <div class="container">
-      <SectionHead eyebrow={n.latestEyebrow} title={n.latestTitle} />
-      <div class="card-grid">
+  <section class="section section--paper">
+    <div class="container reveal">
+      <Heading eyebrow={n.latestEyebrow} title={n.latestTitle} />
+      <div class="grid grid-3">
         {rest.map((item) => (
-          <article class="story-card card--lift">
-            <div class="story-card__media">
+          <article class="pcard">
+            <div class="pcard__media">
               <img src={item.image} alt="" width="1200" height="900" loading="lazy" />
-              <time class="story-card__date" datetime={item.date}>{formatShortDate(item.date, locale)}</time>
             </div>
-            <div class="story-card__body">
-              <span class="tag">{item.category[locale]}</span>
-              <h3>{item.title[locale]}</h3>
-              <p>{item.summary[locale]}</p>
+            <div class="pcard__body">
+              <div class="meta-row">
+                <span class="tag">{item.category[locale]}</span>
+                <time datetime={item.date}>{formatShortDate(item.date, locale)}</time>
+              </div>
+              <h3 class="card__title">{item.title[locale]}</h3>
+              <p class="card__text">{item.summary[locale]}</p>
             </div>
           </article>
         ))}
@@ -77,42 +79,46 @@ const calendarLabel = siteConfig.calendarStyle === 'old' ? dict.schedule.calenda
     </div>
   </section>
 
-  <section class="reveal section">
-    <div class="container split split--aside">
+  <section class="section">
+    <div class="container split split--form reveal">
       <div>
-        <SectionHead eyebrow={n.eventsEyebrow} title={n.eventsTitle}>
-          <span slot="aside" class="calendar-badge">{calendarLabel}</span>
-        </SectionHead>
+        <Heading eyebrow={n.eventsEyebrow} title={n.eventsTitle} align="left">
+          <span class="calendar-badge">{calendarLabel}</span>
+        </Heading>
         <ScheduleList locale={locale} items={upcomingEvents} layout="list" />
       </div>
-      <aside class="aside-stack">
-        <div class="notice-board">
-          <h3 class="aside-card__title"><Icon name="pin2" size={20} />{n.noticesTitle}</h3>
+      <div class="stack stack--sticky">
+        <div class="card notice">
+          <h3 class="card__title" style="font-size:1.25rem;display:flex;align-items:center;gap:0.6rem"><Icon name="pin2" size={20} />{n.noticesTitle}</h3>
           <ul>
             {n.notices.map((note) => <li>{note}</li>)}
           </ul>
         </div>
-        <a class="mini-card" href={dict.paths.livestream}>
-          <span class="mini-card__media"><img src={images.media.iconostasis.src} alt="" width="1200" height="900" loading="lazy" /></span>
-          <span class="mini-card__body">
-            <span class="mini-card__title"><span class="live-dot" aria-hidden="true"></span>{dict.nav.livestream}</span>
-            <span class="mini-card__text">{pg.schedule.liveText}</span>
-            <span class="photo-card__more">{pg.schedule.liveCta} <Icon name="arrow" size={16} /></span>
-          </span>
+        <a class="pcard" href={dict.paths.livestream}>
+          <div class="pcard__media" style="aspect-ratio:16/7">
+            <img src={images.media.iconostasis.src} alt="" width="1200" height="900" loading="lazy" />
+          </div>
+          <div class="pcard__body">
+            <h3 class="card__title" style="font-size:1.25rem"><span class="live-dot" aria-hidden="true" style="margin-right:0.5rem;vertical-align:3px"></span>{dict.nav.livestream}</h3>
+            <p class="card__text">{pg.schedule.liveText}</p>
+            <span class="link-arrow">{pg.schedule.liveCta} <Icon name="arrow" size={16} /></span>
+          </div>
         </a>
-      </aside>
+      </div>
     </div>
   </section>
 
-  <section class="reveal section section--dark section--ornate">
-    <div class="container newsletter-band">
-      <div>
-        <p class="eyebrow">{n.newsletterEyebrow}</p>
-        <h2>{n.newsletterTitle}</h2>
-        <Ornament light />
-        <p class="lede lede--light" style="margin-bottom:0;">{n.newsletterText}</p>
+  <section class="section section--flush-top">
+    <div class="container reveal">
+      <div class="newsletter-panel">
+        <div>
+          <p class="eyebrow">{n.newsletterEyebrow}</p>
+          <h2>{n.newsletterTitle}</h2>
+          <Motif light />
+          <p>{n.newsletterText}</p>
+        </div>
+        <NewsletterForm locale={locale} button="btn-gold" />
       </div>
-      <NewsletterForm locale={locale} />
     </div>
   </section>
 </BaseLayout>

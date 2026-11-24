@@ -1,8 +1,9 @@
 ---
 import type { Locale } from '../config/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PageHero from '../components/PageHero.astro';
-import SectionHead from '../components/SectionHead.astro';
+import PageBanner from '../components/PageBanner.astro';
+import Heading from '../components/Heading.astro';
+import Motif from '../components/Motif.astro';
 import ContactForm from '../components/ContactForm.astro';
 import Icon from '../components/Icon.astro';
 import { siteConfig } from '../config/site';
@@ -20,9 +21,10 @@ const pg = p(locale);
 const c = pg.contact;
 const addr = siteConfig.address;
 const m = images.media;
+const tel = `tel:${siteConfig.phone.replace(/\D/g, '')}`;
 ---
 <BaseLayout locale={locale} title={dict.contact.title} current="contact" description={c.lede}>
-  <PageHero
+  <PageBanner
     image={{ src: images.pages.contact.src, alt: images.pages.contact.alt[locale] }}
     eyebrow={dict.nav.contact}
     title={dict.contact.title}
@@ -31,112 +33,91 @@ const m = images.media;
     crumbLabel={pg.common.breadcrumb}
   />
 
-  <section class="reveal section">
-    <div class="container split split--form">
-      <div>
-        <SectionHead eyebrow={c.infoEyebrow} title={c.infoTitle} />
-        <p class="lede">{c.infoText}</p>
-        <ul class="info-list">
-          <li>
-            <span class="info-list__icon"><Icon name="pin" size={20} /></span>
-            <span>
-              <span class="info-list__label">{dict.contact.address}</span>
-              <span class="info-list__value">{addr.street}<br />{addr.city}, {addr.region} {addr.postal}<br />{addr.country[locale]}</span>
-            </span>
-          </li>
-          <li>
-            <span class="info-list__icon"><Icon name="phone" size={20} /></span>
-            <span>
-              <span class="info-list__label">{dict.contact.phone}</span>
-              <a class="info-list__value" href={`tel:${siteConfig.phone.replace(/\D/g, '')}`}>{siteConfig.phone}</a>
-            </span>
-          </li>
-          <li>
-            <span class="info-list__icon"><Icon name="mail" size={20} /></span>
-            <span>
-              <span class="info-list__label">{dict.contact.email}</span>
-              <a class="info-list__value" href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a>
-            </span>
-          </li>
-          {siteConfig.features.visitingBlock && (
-            <li>
-              <span class="info-list__icon"><Icon name="clock" size={20} /></span>
-              <span>
-                <span class="info-list__label">{dict.contact.hours}</span>
-                <span class="info-list__value">{dict.contact.hoursText}</span>
-              </span>
-            </li>
-          )}
-        </ul>
+  <section class="section section--tight">
+    <div class="container reveal">
+      <div class="grid grid-3">
+        <div class="card">
+          <span class="icon-badge"><Icon name="pin" size={20} /></span>
+          <p class="info-list__label">{dict.contact.address}</p>
+          <p class="info-list__value" style="margin:0.3rem 0 0">{addr.street}<br />{addr.postal} {addr.city}, {addr.country[locale]}</p>
+        </div>
+        <div class="card">
+          <span class="icon-badge"><Icon name="phone" size={20} /></span>
+          <p class="info-list__label">{dict.contact.phone}</p>
+          <p class="info-list__value" style="margin:0.3rem 0 0"><a href={tel}>{siteConfig.phone}</a></p>
+        </div>
+        <div class="card">
+          <span class="icon-badge"><Icon name="mail" size={20} /></span>
+          <p class="info-list__label">{dict.contact.email}</p>
+          <p class="info-list__value" style="margin:0.3rem 0 0"><a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a></p>
+        </div>
       </div>
-      <div class="card card--gold form-card">
+    </div>
+  </section>
+
+  <section class="section section--flush-top">
+    <div class="container split split--form reveal">
+      <div class="card form-card">
+        <p class="eyebrow">{c.infoEyebrow}</p>
         <h2 class="form-card__title">{dict.contact.formTitle}</h2>
+        <Motif />
+        <p class="form-intro">{c.infoText}</p>
         <ContactForm locale={locale} />
       </div>
-    </div>
-  </section>
-
-  <section class="reveal section section--band">
-    <div class="container split split--map">
-      <div class="map-card">
-        <svg class="map-card__art" viewBox="0 0 640 440" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
-          <rect width="640" height="440" fill="#efe6d6" />
-          <rect x="60" y="40" width="170" height="120" rx="6" fill="#e4d7c2" />
-          <rect x="270" y="40" width="130" height="120" rx="6" fill="#e4d7c2" />
-          <rect x="440" y="40" width="160" height="120" rx="6" fill="#dfe6d4" />
-          <rect x="60" y="200" width="170" height="200" rx="6" fill="#e4d7c2" />
-          <rect x="270" y="200" width="130" height="90" rx="6" fill="#e9dcc6" />
-          <rect x="440" y="200" width="160" height="200" rx="6" fill="#e4d7c2" />
-          <rect x="270" y="320" width="130" height="80" rx="6" fill="#dfe6d4" />
-          <path d="M0 180h640M250 0v440M420 0v440" stroke="#fffcf7" stroke-width="22" />
-          <path d="M0 330C160 300 300 420 640 360" stroke="#fffcf7" stroke-width="14" fill="none" />
-          <path d="M0 180h640M250 0v440M420 0v440" stroke="#d2c2a8" stroke-width="1" stroke-dasharray="6 10" />
-          <circle cx="335" cy="245" r="40" fill="#6b1d24" fill-opacity="0.12" />
-        </svg>
-        <span class="map-card__pin" aria-hidden="true">
-          <img src="/icons/cross-trefoil.svg" alt="" width="18" height="18" />
-        </span>
-        <p class="map-card__note">{c.mapNote}</p>
-      </div>
-      <div>
-        <SectionHead eyebrow={c.directionsEyebrow} title={c.directionsTitle} />
-        <p class="info-line"><Icon name="pin" size={18} />{addr.street}, {addr.city}</p>
-        <div class="btn-row btn-row--tight">
-          <a class="btn btn-accent btn-sm" href={siteConfig.maps.google} target="_blank" rel="noopener noreferrer">{c.openGoogle}</a>
-          <a class="btn btn-secondary btn-sm" href={siteConfig.maps.apple} target="_blank" rel="noopener noreferrer">{c.openApple}</a>
-          <a class="btn btn-secondary btn-sm" href={siteConfig.maps.osm} target="_blank" rel="noopener noreferrer">{c.openOsm}</a>
-        </div>
-        <ul class="info-tiles info-tiles--stack">
-          {c.directions.map((it) => (
-            <li class="info-tile">
-              <span class="info-tile__icon"><Icon name={it.icon} size={22} /></span>
-              <span>
-                <span class="info-tile__title">{it.title}</span>
-                <span class="info-tile__text">{it.text}</span>
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <section class="reveal section">
-    <div class="container split">
-      <div>
-        <SectionHead eyebrow={c.hoursEyebrow} title={c.hoursTitle} />
-        <dl class="hours-table">
-          {c.hours.map((h) => (
-            <div class="hours-table__row">
-              <dt>{h.label}</dt>
-              <dd>{h.value}</dd>
+      <div class="stack">
+        <div class="map-card">
+          <div class="map-card__body">
+            <span class="map-card__pin"><Icon name="pin" size={22} /></span>
+            <p class="map-card__addr">{addr.street}, {addr.city}</p>
+            <div class="btn-row btn-row--center" style="margin-top:0.25rem">
+              <a class="btn btn-primary btn-sm" href={siteConfig.maps.google} target="_blank" rel="noopener noreferrer">{c.openGoogle}</a>
+              <a class="btn btn-secondary btn-sm" href={siteConfig.maps.apple} target="_blank" rel="noopener noreferrer">{c.openApple}</a>
+              <a class="btn btn-secondary btn-sm" href={siteConfig.maps.osm} target="_blank" rel="noopener noreferrer">{c.openOsm}</a>
             </div>
-          ))}
-        </dl>
-        <a class="section-link" href={dict.paths.schedule}>{dict.schedule.title} →</a>
+            <p class="map-card__note">{c.mapNote}</p>
+          </div>
+        </div>
+        <div class="card">
+          <h3 class="card__title" style="font-size:1.25rem">{c.hoursTitle}</h3>
+          <dl class="hours">
+            {c.hours.map((h) => (
+              <div><dt>{h.label}</dt><dd>{h.value}</dd></div>
+            ))}
+          </dl>
+        </div>
       </div>
-      <figure class="media-frame media-frame--arch media-frame--caption">
-        <img src={m.dragomirna.src} alt={m.dragomirna.alt[locale]} width="1200" height="900" loading="lazy" />
+    </div>
+  </section>
+
+  <section class="section section--paper">
+    <div class="container reveal">
+      <Heading eyebrow={c.directionsEyebrow} title={c.directionsTitle} />
+      <div class="grid grid-3">
+        {c.directions.map((it) => (
+          <div class="card" style="background:var(--cream)">
+            <span class="icon-badge"><Icon name={it.icon} size={20} /></span>
+            <h3 class="card__title" style="font-size:1.2rem">{it.title}</h3>
+            <p class="card__text">{it.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container split reveal">
+      <div>
+        <p class="eyebrow">{c.hoursEyebrow}</p>
+        <h2>{dict.parish.visitingTitle}</h2>
+        <Motif />
+        <p class="lede">{dict.parish.visitingText}</p>
+        <div class="btn-row">
+          <a class="btn btn-primary" href={dict.paths.schedule}>{dict.schedule.title}</a>
+          <a class="btn btn-secondary" href={dict.paths.parish}>{dict.nav.parish}</a>
+        </div>
+      </div>
+      <figure class="figure figure--wide">
+        <img src={m.dragomirna.src} alt={m.dragomirna.alt[locale]} width={m.dragomirna.w} height={m.dragomirna.h} loading="lazy" />
         <figcaption>{c.visitCaption}</figcaption>
       </figure>
     </div>

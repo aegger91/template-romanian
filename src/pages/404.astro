@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PageHero from '../components/PageHero.astro';
+import PageBanner from '../components/PageBanner.astro';
+import Heading from '../components/Heading.astro';
 import Icon from '../components/Icon.astro';
 import { images } from '../config/images';
 import { t } from '../i18n/ui';
@@ -17,7 +18,7 @@ const links = [
 ];
 ---
 <BaseLayout locale={locale} title={dict.notFound.title} current="home">
-  <PageHero
+  <PageBanner
     image={{ src: images.pages.notFound.src, alt: images.pages.notFound.alt[locale] }}
     eyebrow={pg.notFound.eyebrow}
     title={dict.notFound.title}
@@ -25,21 +26,21 @@ const links = [
     crumbs={[{ label: dict.nav.home, href: '/' }, { label: '404' }]}
     crumbLabel={pg.common.breadcrumb}
   >
-    <p class="phero__lede phero__lede--alt" lang="en">The page you requested does not exist.</p>
-    <div class="hero__actions" style="margin-top:1.25rem;">
-      <a class="btn btn-gold" href="/">{dict.notFound.home}</a>
-      <a class="btn btn-ghost" href="/en/">Home (EN)</a>
+    <p class="banner__lede" lang="en" style="margin-bottom:1.25rem">The page you requested does not exist.</p>
+    <div class="btn-row" style="margin-top:0">
+      <a class="btn btn-white" href="/">{dict.notFound.home}</a>
+      <a class="btn btn-light" href="/en/" lang="en">Home (EN)</a>
     </div>
-  </PageHero>
+  </PageBanner>
 
   <section class="section">
     <div class="container">
-      <p class="eyebrow">{pg.notFound.links} · Useful pages</p>
-      <div class="quick-links">
+      <Heading eyebrow="Useful pages" title={pg.notFound.links} />
+      <div class="grid grid-4">
         {links.map((l) => (
-          <div class="quick-link card--lift">
+          <div class="card quick-link">
             <a href={l.href}>{l.label} <Icon name="arrow" size={16} /></a>
-            <a class="quick-link__en" href={l.en} lang="en">{l.enLabel}</a>
+            <p class="small" style="margin:0.4rem 0 0"><a class="text-link" href={l.en} lang="en" style="font-family:var(--font-body);font-size:0.85rem">{l.enLabel}</a></p>
           </div>
         ))}
       </div>

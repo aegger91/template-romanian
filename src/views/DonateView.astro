@@ -1,10 +1,11 @@
 ---
 import type { Locale } from '../config/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PageHero from '../components/PageHero.astro';
-import SectionHead from '../components/SectionHead.astro';
+import PageBanner from '../components/PageBanner.astro';
+import Heading from '../components/Heading.astro';
+import Motif from '../components/Motif.astro';
 import AmountForm from '../components/AmountForm.astro';
-import Ornament from '../components/Ornament.astro';
+import OrthodoxCross from '../components/OrthodoxCross.astro';
 import Icon from '../components/Icon.astro';
 import { siteConfig } from '../config/site';
 import { images } from '../config/images';
@@ -24,7 +25,7 @@ const showProgress = siteConfig.features.donationProgress && siteConfig.features
 const iban = d.ways[0].lines[1].split(': ')[1];
 ---
 <BaseLayout locale={locale} title={dict.donate.title} current="donate" description={d.lede}>
-  <PageHero
+  <PageBanner
     image={{ src: images.pages.donate.src, alt: images.pages.donate.alt[locale] }}
     eyebrow={dict.nav.donate}
     title={dict.donate.title}
@@ -33,38 +34,42 @@ const iban = d.ways[0].lines[1].split(': ')[1];
     crumbLabel={pg.common.breadcrumb}
   />
 
-  <section class="reveal section">
-    <div class="container split split--form-main">
-      <div class="card card--gold form-card" id="donate-form">
-        <SectionHead eyebrow={d.formEyebrow} title={d.formTitle} />
-        <p class="form-note" style="margin-top:-0.75rem;">{dict.donate.intro}</p>
+  <section class="section section--tight">
+    <div class="container split split--form reveal">
+      <div class="card form-card" id="donate-form">
+        <p class="eyebrow">{d.formEyebrow}</p>
+        <h2 class="form-card__title">{d.formTitle}</h2>
+        <Motif />
+        <p class="form-intro">{dict.donate.intro}</p>
         <AmountForm locale={locale} kind="donate" />
       </div>
-      <aside class="support-panel">
-        <span class="support-panel__cross" aria-hidden="true"><img src="/icons/cross-trefoil.svg" alt="" width="30" height="30" /></span>
-        <p class="eyebrow">{d.asideEyebrow}</p>
-        <h2>{d.asideTitle}</h2>
-        <Ornament light align="center" />
-        <ul class="support-list">
-          {d.asideItems.map((it) => (
-            <li><span class="support-list__icon"><Icon name={it.icon} size={20} /></span>{it.text}</li>
-          ))}
-        </ul>
-        <figure class="support-panel__media">
-          <img src={m.frescoHumor.src} alt={m.frescoHumor.alt[locale]} width="1200" height="900" loading="lazy" />
+      <div class="stack stack--sticky">
+        <aside class="aside-panel">
+          <p class="eyebrow">{d.asideEyebrow}</p>
+          <h2>{d.asideTitle}</h2>
+          <ul class="aside-list">
+            {d.asideItems.map((it) => (
+              <li><Icon name={it.icon} size={20} />{it.text}</li>
+            ))}
+          </ul>
+          <p class="aside-quote">{d.thanksText}</p>
+        </aside>
+        <figure class="figure figure--wide">
+          <img src={m.frescoHumor.src} alt={m.frescoHumor.alt[locale]} width={m.frescoHumor.w} height={m.frescoHumor.h} loading="lazy" />
+          <figcaption>{m.frescoHumor.alt[locale]}</figcaption>
         </figure>
-      </aside>
+      </div>
     </div>
   </section>
 
-  <section class="reveal section section--band">
-    <div class="container">
-      <SectionHead eyebrow={d.waysEyebrow} title={d.waysTitle} />
-      <div class="card-grid">
+  <section class="section section--paper">
+    <div class="container reveal">
+      <Heading eyebrow={d.waysEyebrow} title={d.waysTitle} />
+      <div class="grid grid-3">
         {d.ways.map((w, i) => (
-          <article class="card card--gold feature-card card--lift">
-            <span class="feature-card__icon"><Icon name={w.icon} size={26} /></span>
-            <h3>{w.title}</h3>
+          <article class="card">
+            <span class="icon-badge"><Icon name={w.icon} size={20} /></span>
+            <h3 class="card__title">{w.title}</h3>
             <ul class="plain-lines">
               {w.lines.map((line) => <li>{line}</li>)}
             </ul>
@@ -79,31 +84,37 @@ const iban = d.ways[0].lines[1].split(': ')[1];
     </div>
   </section>
 
-  <section class="reveal section">
-    <div class="container split">
-      <div class="media-frame media-frame--arch">
-        <img src={m.frescoSucevita.src} alt={m.frescoSucevita.alt[locale]} width="1200" height="900" loading="lazy" />
-      </div>
-      <div>
-        <SectionHead eyebrow={d.projectEyebrow} title={d.projectTitle} />
-        <p class="lede">{d.projectText}</p>
-        {showProgress && (
-          <div>
-            <p class="eyebrow">{dict.donate.progressLabel}</p>
-            <div class="progress" aria-hidden="true"><span style="width:42%"></span></div>
+  <section class="section">
+    <div class="container reveal">
+      <div class="feature">
+        <div class="feature__media">
+          <img src={m.frescoSucevita.src} alt={m.frescoSucevita.alt[locale]} width={m.frescoSucevita.w} height={m.frescoSucevita.h} loading="lazy" />
+        </div>
+        <div class="feature__body">
+          <p class="eyebrow">{d.projectEyebrow}</p>
+          <h2>{d.projectTitle}</h2>
+          <Motif />
+          <p class="lede">{d.projectText}</p>
+          {showProgress && (
+            <div>
+              <p class="eyebrow">{dict.donate.progressLabel}</p>
+              <div class="progress" aria-hidden="true"><span style="width:42%"></span></div>
+            </div>
+          )}
+          <div class="btn-row">
+            <a class="btn btn-accent" href="#donate-form">{d.projectCta}</a>
           </div>
-        )}
-        <a class="btn btn-accent" href="#donate-form">{d.projectCta}</a>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="reveal section section--dark section--ornate">
-    <div class="container thanks">
-      <img src="/icons/cross-trefoil.svg" alt="" width="34" height="34" class="thanks__cross" />
+  <section class="section section--deep">
+    <div class="container quote reveal">
+      <OrthodoxCross size={30} class="quote__cross" />
       <h2>{d.thanksTitle}</h2>
-      <Ornament light align="center" />
-      <p class="lede lede--light">{d.thanksText}</p>
+      <Motif center />
+      <p class="lede" style="margin-inline:auto">{d.thanksText}</p>
     </div>
   </section>
 </BaseLayout>

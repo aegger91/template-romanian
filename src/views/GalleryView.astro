@@ -1,16 +1,15 @@
 ---
 import type { Locale } from '../config/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PageHero from '../components/PageHero.astro';
-import SubNav from '../components/SubNav.astro';
-import SectionHead from '../components/SectionHead.astro';
-import CtaBand from '../components/CtaBand.astro';
+import PageBanner from '../components/PageBanner.astro';
+import Heading from '../components/Heading.astro';
+import PhotoBand from '../components/PhotoBand.astro';
 import GalleryGrid from '../components/GalleryGrid.astro';
 import { images } from '../config/images';
 import { featuredIcons } from '../config/gallery';
 import { t } from '../i18n/ui';
 import { p } from '../i18n/pages';
-import { parishTabs, crumbs } from './nav';
+import { crumbs } from './nav';
 
 interface Props {
   locale: Locale;
@@ -21,7 +20,7 @@ const pg = p(locale);
 const g = pg.gallery;
 ---
 <BaseLayout locale={locale} title={dict.nav.gallery} current="parish" description={g.lede}>
-  <PageHero
+  <PageBanner
     image={{ src: images.pages.gallery.src, alt: images.pages.gallery.alt[locale] }}
     eyebrow={dict.nav.parish}
     title={dict.nav.gallery}
@@ -29,14 +28,13 @@ const g = pg.gallery;
     crumbs={crumbs(locale, [{ label: dict.nav.parish, href: dict.paths.parish }, { label: dict.nav.gallery }])}
     crumbLabel={pg.common.breadcrumb}
   />
-  <SubNav items={parishTabs(locale, 'gallery')} label={pg.common.sectionNav} />
 
-  <section class="reveal section section--dark section--ornate">
-    <div class="container">
-      <SectionHead eyebrow={g.iconsEyebrow} title={g.iconsTitle} lede={g.iconsLede} align="center" light />
-      <div class="icon-row-framed" role="list">
+  <section class="section">
+    <div class="container reveal">
+      <Heading eyebrow={g.iconsEyebrow} title={g.iconsTitle} lede={g.iconsLede} />
+      <div class="icon-row">
         {featuredIcons.map((icon) => (
-          <figure class="icon-frame icon-frame--small" role="listitem">
+          <figure class="icon-fig">
             <img src={icon.src} alt={icon.alt[locale]} width="900" height="1200" loading="lazy" />
             <figcaption>{icon.alt[locale]}</figcaption>
           </figure>
@@ -45,14 +43,14 @@ const g = pg.gallery;
     </div>
   </section>
 
-  <section class="reveal section">
-    <div class="container">
-      <SectionHead eyebrow={g.gridEyebrow} title={g.gridTitle} />
+  <section class="section section--paper">
+    <div class="container reveal">
+      <Heading eyebrow={g.gridEyebrow} title={g.gridTitle} />
       <GalleryGrid locale={locale} />
     </div>
   </section>
 
-  <CtaBand
+  <PhotoBand
     image={{ src: images.pages.contact.src, alt: images.pages.contact.alt[locale] }}
     eyebrow={g.ctaEyebrow}
     title={g.ctaTitle}

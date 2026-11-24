@@ -1,0 +1,189 @@
+---
+import type { Locale } from '../config/site';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ScheduleList from '../components/ScheduleList.astro';
+import Heading from '../components/Heading.astro';
+import Motif from '../components/Motif.astro';
+import Icon from '../components/Icon.astro';
+import OrthodoxCross from '../components/OrthodoxCross.astro';
+import { siteConfig } from '../config/site';
+import { images } from '../config/images';
+import { thisWeekServices, weeklyServices, newsItems } from '../config/schedule';
+import { t } from '../i18n/ui';
+import { p } from '../i18n/pages';
+import { formatShortDate } from '../utils/dates';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const dict = t(locale);
+const pg = p(locale);
+const h = pg.home;
+const m = images.media;
+const calendar = siteConfig.calendarStyle === 'old' ? dict.schedule.calendarOld : dict.schedule.calendarNew;
+const next = weeklyServices.slice(0, 4);
+const lifeHref: Record<string, string> = {
+  sacraments: dict.paths.sacraments,
+  clergy: dict.paths.clergy,
+  history: dict.paths.history,
+  gallery: dict.paths.gallery,
+};
+---
+<BaseLayout locale={locale} title={dict.nav.home} current="home" description={pg.parish.lede}>
+  <h1 class="sr-only">{siteConfig.name[locale]}</h1>
+  <section class="container tiles" aria-label={h.nextTitle}>
+    <article class="tile tile--photo">
+      <div class="tile__media">
+        <img src={images.hero.src} alt={images.hero.alt[locale]} width="1800" height="1200" fetchpriority="high" />
+      </div>
+      <div class="tile__shade"></div>
+      <div class="tile__body">
+        <p class="tile__label">{h.nextEyebrow}</p>
+        <h2 class="tile__title">{h.nextTitle}</h2>
+        <p class="tile__text">{h.nextText}</p>
+        <ScheduleList locale={locale} items={next} layout="tile" />
+        <div class="tile__actions">
+          <a class="btn btn-white" href={dict.paths.schedule}>{h.nextCta} <Icon name="arrow" size={16} /></a>
+          <a class="btn btn-light" href={dict.paths.livestream}><Icon name="live" size={16} /> {dict.nav.livestream}</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="tile tile--blue">
+      <div class="tile__body">
+        <span class="tile__mark"><Icon name="calendar" size={28} /></span>
+        <p class="tile__label"><span class="calendar-badge calendar-badge--light">{calendar}</span></p>
+        <h2 class="tile__title">{h.scheduleTitle}</h2>
+        <p class="tile__text">{h.scheduleText}</p>
+        <div class="tile__actions">
+          <a class="btn btn-light" href={dict.paths.schedule}>{h.scheduleCta}</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="tile tile--red">
+      <div class="tile__body">
+        <span class="tile__mark"><Icon name="candle" size={28} /></span>
+        <h2 class="tile__title">{h.donateTitle}</h2>
+        <p class="tile__text">{h.donateText}</p>
+        <div class="tile__actions">
+          <a class="btn btn-light" href={dict.paths.donate}>{h.donateCta}</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="tile tile--gold tile--wide">
+      <div class="tile__media">
+        <img src={m.candleBoxes.src} alt="" width={m.candleBoxes.w} height={m.candleBoxes.h} loading="lazy" />
+      </div>
+      <div class="tile__shade"></div>
+      <div class="tile__body">
+        <span class="tile__mark"><OrthodoxCross size={28} /></span>
+        <h2 class="tile__title">{h.namesTitle}</h2>
+        <p class="tile__text" style="max-width:22rem">{h.namesText}</p>
+        <div class="tile__actions">
+          <a class="btn btn-light" href={dict.paths.pomelnice}>{h.namesCta}</a>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="section">
+    <div class="container split split--wide-end reveal">
+      <figure class="figure figure--tall" style="max-width:26rem;justify-self:center;width:100%">
+        <img src={m.iconNicholas.src} alt={m.iconNicholas.alt[locale]} width={m.iconNicholas.w} height={m.iconNicholas.h} loading="lazy" />
+        <figcaption>{h.iconCaption}</figcaption>
+      </figure>
+      <div>
+        <p class="eyebrow">{h.welcomeEyebrow}</p>
+        <h2>{h.welcomeTitle}</h2>
+        <Motif />
+        <p class="lede">{pg.parish.welcomeText}</p>
+        <dl class="stats">
+          {pg.parish.facts.map((f) => (
+            <div><dt>{f.label}</dt><dd>{f.value}</dd></div>
+          ))}
+        </dl>
+        <div class="btn-row">
+          <a class="btn btn-primary" href={dict.paths.parish}>{h.welcomeCta}</a>
+          <a class="btn btn-secondary" href={dict.paths.contact}>{dict.nav.contact}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--paper">
+    <div class="container reveal">
+      <Heading eyebrow={h.weeklyEyebrow} title={h.weeklyTitle}>
+        <span class="calendar-badge">{calendar}</span>
+      </Heading>
+      <ScheduleList locale={locale} items={thisWeekServices} layout="cards" liveLabel={h.live} narrow />
+      <p class="section-foot"><a class="link-arrow" href={dict.paths.schedule}>{h.nextCta} <Icon name="arrow" size={16} /></a></p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container reveal">
+      <Heading eyebrow={h.lifeEyebrow} title={h.lifeTitle} />
+      <div class="grid grid-4">
+        {h.life.map((c) => (
+          <a class="card card--link card--flex" href={lifeHref[c.key]}>
+            <span class="icon-badge"><Icon name={c.icon} size={20} /></span>
+            <h3 class="card__title">{c.title}</h3>
+            <p class="card__text">{c.text}</p>
+            <span class="card__foot link-arrow">{pg.common.learnMore} <Icon name="arrow" size={16} /></span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="band__media">
+      <img src={m.stelea.src} alt={m.stelea.alt[locale]} width={m.stelea.w} height={m.stelea.h} loading="lazy" style="object-position:center 35%" />
+    </div>
+    <div class="container">
+      <div class="band__card reveal">
+        <p class="eyebrow"><span class="live-dot" style="margin-right:0.5rem;vertical-align:1px"></span>{h.bandEyebrow}</p>
+        <h2>{h.bandTitle}</h2>
+        <Motif />
+        <p>{h.bandText}</p>
+        <a class="btn btn-primary" href={dict.paths.livestream}>{h.bandCta} <Icon name="arrow" size={16} /></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container reveal">
+      <Heading eyebrow={h.newsEyebrow} title={h.newsTitle} />
+      <div class="grid grid-3">
+        {newsItems.slice(0, 3).map((item) => (
+          <a class="pcard" href={dict.paths.news}>
+            <div class="pcard__media">
+              <img src={item.image} alt="" width="1200" height="900" loading="lazy" />
+            </div>
+            <div class="pcard__body">
+              <div class="meta-row">
+                <span class="tag tag--gold">{item.category[locale]}</span>
+                <time datetime={item.date}>{formatShortDate(item.date, locale)}</time>
+              </div>
+              <h3 class="card__title">{item.title[locale]}</h3>
+              <p class="card__text">{item.summary[locale]}</p>
+              <span class="link-arrow">{dict.home.readMore} <Icon name="arrow" size={16} /></span>
+            </div>
+          </a>
+        ))}
+      </div>
+      <p class="section-foot"><a class="link-arrow" href={dict.paths.news}>{h.newsCta} <Icon name="arrow" size={16} /></a></p>
+    </div>
+  </section>
+
+  <section class="section section--deep">
+    <figure class="container quote reveal">
+      <OrthodoxCross size={30} class="quote__cross" />
+      <blockquote>{h.quote}</blockquote>
+      <figcaption>{h.quoteSource}</figcaption>
+    </figure>
+  </section>
+</BaseLayout>

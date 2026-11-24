@@ -1,18 +1,17 @@
 ---
 import type { Locale } from '../config/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PageHero from '../components/PageHero.astro';
-import SubNav from '../components/SubNav.astro';
-import SectionHead from '../components/SectionHead.astro';
-import Ornament from '../components/Ornament.astro';
-import CtaBand from '../components/CtaBand.astro';
+import PageBanner from '../components/PageBanner.astro';
+import Heading from '../components/Heading.astro';
+import Motif from '../components/Motif.astro';
+import PhotoBand from '../components/PhotoBand.astro';
 import Portrait from '../components/Portrait.astro';
 import Icon from '../components/Icon.astro';
 import { siteConfig } from '../config/site';
 import { images } from '../config/images';
 import { t } from '../i18n/ui';
 import { p } from '../i18n/pages';
-import { parishTabs, crumbs } from './nav';
+import { crumbs } from './nav';
 
 interface Props {
   locale: Locale;
@@ -25,63 +24,61 @@ const [lead, ...team] = siteConfig.clergy;
 const tel = (n: string) => `tel:${n.replace(/\D/g, '')}`;
 ---
 <BaseLayout locale={locale} title={dict.nav.clergy} current="parish" description={c.lede}>
-  <PageHero
+  <PageBanner
     image={{ src: images.pages.clergy.src, alt: images.pages.clergy.alt[locale] }}
     eyebrow={dict.nav.parish}
     title={dict.nav.clergy}
     lede={c.lede}
     crumbs={crumbs(locale, [{ label: dict.nav.parish, href: dict.paths.parish }, { label: dict.nav.clergy }])}
     crumbLabel={pg.common.breadcrumb}
+    position="center 30%"
   />
-  <SubNav items={parishTabs(locale, 'clergy')} label={pg.common.sectionNav} />
 
-  <section class="reveal section">
-    <div class="container split split--portrait">
-      <div class="portrait-frame">
-        <Portrait name={lead.name} photo={lead.photo} label={pg.common.photo} tone={0} />
-      </div>
-      <div>
-        <p class="eyebrow eyebrow--cross">
-          <img src="/icons/cross-trefoil.svg" alt="" width="12" height="12" />
-          {lead.role[locale]}
-        </p>
-        <h2 class="person-name">{lead.name}</h2>
-        <Ornament />
-        <p class="lede">{lead.bio[locale]}</p>
-        <ul class="contact-lines">
-          {'email' in lead && lead.email && (
-            <li><Icon name="mail" size={18} /><a href={`mailto:${lead.email}`}>{lead.email}</a></li>
-          )}
-          {'phone' in lead && lead.phone && (
-            <li><Icon name="phone" size={18} /><a href={tel(lead.phone)}>{lead.phone}</a></li>
-          )}
-        </ul>
-        <div class="btn-row">
-          <a class="btn btn-primary" href={dict.paths.sacraments}>{c.featuredCta}</a>
-          <a class="btn btn-secondary" href={dict.paths.contact}>{c.featuredSecondary}</a>
+  <section class="section">
+    <div class="container reveal">
+      <div class="feature">
+        <div class="feature__media">
+          <Portrait name={lead.name} photo={lead.photo} label={pg.common.photo} tone={0} />
+        </div>
+        <div class="feature__body">
+          <p class="eyebrow">{lead.role[locale]}</p>
+          <h2>{lead.name}</h2>
+          <Motif />
+          <p class="lede">{lead.bio[locale]}</p>
+          <ul class="info-list" style="margin-top:1.25rem">
+            {'email' in lead && lead.email && (
+              <li><Icon name="mail" size={18} /><span><span class="info-list__label">{dict.contact.email}</span><a class="info-list__value" href={`mailto:${lead.email}`}>{lead.email}</a></span></li>
+            )}
+            {'phone' in lead && lead.phone && (
+              <li><Icon name="phone" size={18} /><span><span class="info-list__label">{dict.contact.phone}</span><a class="info-list__value" href={tel(lead.phone)}>{lead.phone}</a></span></li>
+            )}
+          </ul>
+          <div class="btn-row">
+            <a class="btn btn-primary" href={dict.paths.sacraments}>{c.featuredCta}</a>
+            <a class="btn btn-secondary" href={dict.paths.contact}>{c.featuredSecondary}</a>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="reveal section section--band">
-    <div class="container">
-      <SectionHead eyebrow={c.teamEyebrow} title={c.teamTitle} />
-      <div class="people-grid">
+  <section class="section section--paper">
+    <div class="container reveal">
+      <Heading eyebrow={c.teamEyebrow} title={c.teamTitle} />
+      <div class="grid grid-3">
         {team.map((person, i) => (
-          <article class="person-card card--lift">
-            <div class="person-card__media">
+          <article class="person">
+            <div class="person__media">
               <Portrait name={person.name} photo={person.photo} label={pg.common.photo} tone={i + 1} />
             </div>
-            <div class="person-card__body">
-              <p class="eyebrow eyebrow--cross">
-                <img src="/icons/cross-trefoil.svg" alt="" width="11" height="11" />
-                {person.role[locale]}
-              </p>
-              <h3>{person.name}</h3>
-              <p class="person-card__bio">{person.bio[locale]}</p>
+            <div class="person__body">
+              <p class="person__role">{person.role[locale]}</p>
+              <h3 class="person__name">{person.name}</h3>
+              <p class="person__bio">{person.bio[locale]}</p>
               {'email' in person && person.email && (
-                <a class="person-card__link" href={`mailto:${person.email}`}><Icon name="mail" size={16} />{person.email}</a>
+                <ul class="person__contact">
+                  <li><Icon name="mail" size={16} /><a href={`mailto:${person.email}`}>{person.email}</a></li>
+                </ul>
               )}
             </div>
           </article>
@@ -90,26 +87,28 @@ const tel = (n: string) => `tel:${n.replace(/\D/g, '')}`;
     </div>
   </section>
 
-  <section class="reveal section section--dark section--ornate">
-    <div class="container">
-      <SectionHead eyebrow={c.pastoralEyebrow} title={c.pastoralTitle} lede={c.pastoralText} light />
-      <div class="glass-grid">
-        {c.pastoral.map((it) => (
-          <div class="glass-card">
-            <span class="glass-card__icon"><Icon name={it.icon} size={24} /></span>
-            <h3>{it.title}</h3>
-            <p>{it.text}</p>
-          </div>
-        ))}
-      </div>
-      <div class="btn-row" style="margin-top:1.75rem;">
-        <a class="btn btn-gold" href={`tel:${siteConfig.phone.replace(/\D/g, '')}`}><Icon name="phone" size={18} />{siteConfig.phone}</a>
-        <a class="btn btn-ghost" href={`mailto:${siteConfig.email}`}><Icon name="mail" size={18} />{siteConfig.email}</a>
+  <section class="section">
+    <div class="container reveal">
+      <div class="aside-panel dark-block">
+        <Heading eyebrow={c.pastoralEyebrow} title={c.pastoralTitle} lede={c.pastoralText} light />
+        <div class="grid grid-3">
+          {c.pastoral.map((it) => (
+            <div class="dark-card">
+              <span class="icon-badge icon-badge--light"><Icon name={it.icon} size={20} /></span>
+              <h3>{it.title}</h3>
+              <p>{it.text}</p>
+            </div>
+          ))}
+        </div>
+        <div class="btn-row btn-row--center" style="margin-top:2rem">
+          <a class="btn btn-white" href={`tel:${siteConfig.phone.replace(/\D/g, '')}`}><Icon name="phone" size={18} />{siteConfig.phone}</a>
+          <a class="btn btn-light" href={`mailto:${siteConfig.email}`}><Icon name="mail" size={18} />{siteConfig.email}</a>
+        </div>
       </div>
     </div>
   </section>
 
-  <CtaBand
+  <PhotoBand
     image={{ src: images.pages.sacraments.src, alt: images.pages.sacraments.alt[locale] }}
     eyebrow={c.ctaEyebrow}
     title={c.ctaTitle}

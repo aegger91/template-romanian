@@ -1,11 +1,10 @@
 ---
 import type { Locale } from '../config/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PageHero from '../components/PageHero.astro';
-import SubNav from '../components/SubNav.astro';
-import SectionHead from '../components/SectionHead.astro';
+import PageBanner from '../components/PageBanner.astro';
+import Heading from '../components/Heading.astro';
 import ScheduleList from '../components/ScheduleList.astro';
-import CtaBand from '../components/CtaBand.astro';
+import PhotoBand from '../components/PhotoBand.astro';
 import Icon from '../components/Icon.astro';
 import { siteConfig } from '../config/site';
 import { images } from '../config/images';
@@ -13,7 +12,7 @@ import { thisWeekServices, previousWeekdayDate } from '../config/schedule';
 import { t } from '../i18n/ui';
 import { p } from '../i18n/pages';
 import { formatShortDate } from '../utils/dates';
-import { serviceTabs, crumbs } from './nav';
+import { crumbs } from './nav';
 
 interface Props {
   locale: Locale;
@@ -31,7 +30,7 @@ const archiveImages: Record<string, string> = {
 const archiveDates = [previousWeekdayDate(0), previousWeekdayDate(6), previousWeekdayDate(3)];
 ---
 <BaseLayout locale={locale} title={dict.livestream.title} current="livestream" description={l.lede}>
-  <PageHero
+  <PageBanner
     image={{ src: images.pages.livestream.src, alt: images.pages.livestream.alt[locale] }}
     eyebrow={dict.nav.livestream}
     title={dict.livestream.title}
@@ -39,71 +38,69 @@ const archiveDates = [previousWeekdayDate(0), previousWeekdayDate(6), previousWe
     crumbs={crumbs(locale, [{ label: dict.nav.livestream }])}
     crumbLabel={pg.common.breadcrumb}
   />
-  <SubNav items={serviceTabs(locale, 'livestream')} label={pg.common.sectionNav} />
 
-  <section class="reveal section">
-    <div class="container stream-layout">
-      <div class="stream-player">
-        <div class="livestream-frame livestream-frame--gilded">
+  <section class="section section--tight">
+    <div class="container stream reveal">
+      <div>
+        <div class="player">
           <img src={images.livestream.src} alt={images.livestream.alt[locale]} width="1280" height="1067" />
-          <div class="stream-player__overlay">
+          <div class="player__overlay">
             <span class="status-pill"><span class="status-pill__dot" aria-hidden="true"></span>{l.status}</span>
-            <span class="stream-player__icon" aria-hidden="true"><Icon name="play" size={34} /></span>
-            <p class="stream-player__title">{l.playerTitle}</p>
-            <p class="stream-player__text">{l.playerText}</p>
-            <a class="btn btn-gold" href={siteConfig.livestreamUrl} target="_blank" rel="noopener noreferrer">
+            <p class="player__title">{l.playerTitle}</p>
+            <p class="player__text">{l.playerText}</p>
+            <a class="btn btn-white" href={siteConfig.livestreamUrl} target="_blank" rel="noopener noreferrer">
               <Icon name="external" size={17} />{dict.livestream.openExternal}
             </a>
           </div>
         </div>
-        <p class="form-note" style="margin-top:0.85rem;">{dict.livestream.offline}</p>
+        <p class="form-note" style="margin-top:0.85rem">{dict.livestream.offline}</p>
       </div>
-      <aside class="card card--gold aside-card stream-upcoming">
-        <h3 class="aside-card__title"><Icon name="live" size={20} />{l.upcomingTitle}</h3>
+      <aside class="card">
+        <h3 class="card__title" style="font-size:1.25rem;display:flex;align-items:center;gap:0.6rem"><Icon name="live" size={20} />{l.upcomingTitle}</h3>
         <ScheduleList locale={locale} items={thisWeekServices} layout="compact" />
-        <a class="section-link" style="display:inline-block;margin-top:1rem;" href={dict.paths.schedule}>{dict.schedule.title} →</a>
+        <a class="link-arrow" style="margin-top:1rem" href={dict.paths.schedule}>{dict.schedule.title} <Icon name="arrow" size={16} /></a>
       </aside>
     </div>
   </section>
 
-  <section class="reveal section section--band">
-    <div class="container">
-      <SectionHead eyebrow={l.whereEyebrow} title={l.whereTitle} />
-      <div class="card-grid">
+  <section class="section section--paper">
+    <div class="container reveal">
+      <Heading eyebrow={l.whereEyebrow} title={l.whereTitle} />
+      <div class="grid grid-3">
         {l.platforms.map((pl) => (
-          <article class="card card--gold feature-card card--lift">
-            <span class="feature-card__icon"><Icon name={pl.icon} size={26} /></span>
-            <h3>{pl.title}</h3>
-            <p>{pl.text}</p>
+          <article class="card">
+            <span class="icon-badge"><Icon name={pl.icon} size={20} /></span>
+            <h3 class="card__title">{pl.title}</h3>
+            <p class="card__text">{pl.text}</p>
           </article>
         ))}
       </div>
     </div>
   </section>
 
-  <section class="reveal section">
-    <div class="container">
-      <SectionHead eyebrow={l.archiveEyebrow} title={l.archiveTitle} />
-      <div class="card-grid">
+  <section class="section">
+    <div class="container reveal">
+      <Heading eyebrow={l.archiveEyebrow} title={l.archiveTitle} />
+      <div class="grid grid-3">
         {l.archive.map((rec, i) => (
-          <a class="story-card story-card--video card--lift" href={siteConfig.livestreamUrl} target="_blank" rel="noopener noreferrer">
-            <span class="story-card__media">
+          <a class="pcard video-card" href={siteConfig.livestreamUrl} target="_blank" rel="noopener noreferrer">
+            <div class="pcard__media">
               <img src={archiveImages[rec.image]} alt="" width="1200" height="900" loading="lazy" />
-              <span class="story-card__play" aria-hidden="true"><Icon name="play" size={28} /></span>
-              <span class="story-card__duration">{rec.duration}</span>
-            </span>
-            <span class="story-card__body">
-              <time class="story-card__when" datetime={archiveDates[i]}>{formatShortDate(archiveDates[i], locale)}</time>
-              <span class="story-card__title">{rec.title}</span>
-              <span class="photo-card__more">{l.watch} <Icon name="arrow" size={16} /></span>
-            </span>
+              <span class="video-card__play" aria-hidden="true"><Icon name="play" size={28} /></span>
+              <span class="video-card__duration">{rec.duration}</span>
+            </div>
+            <div class="pcard__body">
+              <div class="meta-row"><time datetime={archiveDates[i]}>{formatShortDate(archiveDates[i], locale)}</time></div>
+              <h3 class="card__title">{rec.title}</h3>
+              <span class="link-arrow">{l.watch} <Icon name="arrow" size={16} /></span>
+            </div>
           </a>
         ))}
       </div>
     </div>
   </section>
 
-  <CtaBand
+  <PhotoBand
     image={{ src: images.pages.pomelnice.src, alt: images.pages.pomelnice.alt[locale] }}
     eyebrow={l.ctaEyebrow}
     title={l.ctaTitle}

@@ -1,10 +1,10 @@
 ---
 import type { Locale } from '../config/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PageHero from '../components/PageHero.astro';
-import SubNav from '../components/SubNav.astro';
-import SectionHead from '../components/SectionHead.astro';
-import CtaBand from '../components/CtaBand.astro';
+import PageBanner from '../components/PageBanner.astro';
+import Heading from '../components/Heading.astro';
+import Motif from '../components/Motif.astro';
+import PhotoBand from '../components/PhotoBand.astro';
 import Pictogram from '../components/Pictogram.astro';
 import RequestForm from '../components/RequestForm.astro';
 import Icon from '../components/Icon.astro';
@@ -12,7 +12,7 @@ import { siteConfig } from '../config/site';
 import { images } from '../config/images';
 import { t } from '../i18n/ui';
 import { p } from '../i18n/pages';
-import { serviceTabs, crumbs } from './nav';
+import { crumbs } from './nav';
 
 interface Props {
   locale: Locale;
@@ -24,7 +24,7 @@ const s = pg.sacraments;
 const hours = pg.contact.hours[0];
 ---
 <BaseLayout locale={locale} title={dict.nav.sacraments} current="schedule" description={s.lede}>
-  <PageHero
+  <PageBanner
     image={{ src: images.pages.sacraments.src, alt: images.pages.sacraments.alt[locale] }}
     eyebrow={dict.nav.schedule}
     title={dict.nav.sacraments}
@@ -32,33 +32,25 @@ const hours = pg.contact.hours[0];
     crumbs={crumbs(locale, [{ label: dict.nav.schedule, href: dict.paths.schedule }, { label: dict.nav.sacraments }])}
     crumbLabel={pg.common.breadcrumb}
   />
-  <SubNav items={serviceTabs(locale, 'sacraments')} label={pg.common.sectionNav} />
 
-  <section class="reveal section">
-    <div class="container">
-      <SectionHead eyebrow={s.introEyebrow} title={s.introTitle} lede={s.introText} align="center" />
-      <div class="rite-grid">
+  <section class="section">
+    <div class="container reveal">
+      <Heading eyebrow={s.introEyebrow} title={s.introTitle} lede={s.introText} />
+      <div class="grid grid-4">
         {s.items.map((it) => {
           const href = 'href' in it ? dict.paths.pomelnice : '#cerere';
           return (
-            <article class="rite-card" id={it.id}>
-              <div class="rite-card__arch" aria-hidden="true">
-                <Pictogram name={it.icon} size={76} />
-              </div>
-              <div class="rite-card__body">
-                <h3>{it.title}</h3>
-                <p class="rite-card__tags">
-                  {it.tags.map((tag, i) => (
-                    <span class:list={['tag', i === 0 && 'tag--gold']}>
-                      {i === 1 && <Icon name="clock" size={13} />}
-                      {tag}
-                    </span>
-                  ))}
-                </p>
-                <p class="rite-card__text">{it.text}</p>
-                <a class="btn btn-accent btn-sm" href={href} data-request-pick={'href' in it ? undefined : it.id}>
+            <article class="card rite" id={it.id}>
+              <span class="rite__picto"><Pictogram name={it.icon} size={52} /></span>
+              <h3 class="card__title">{it.title}</h3>
+              <p class="rite__tags">
+                {it.tags.map((tag, i) => <span class:list={['tag', i === 0 && 'tag--gold']}>{tag}</span>)}
+              </p>
+              <p class="card__text">{it.text}</p>
+              <div class="card__foot">
+                <a class="link-arrow" href={href} data-request-pick={'href' in it ? undefined : it.id}>
                   {'href' in it ? dict.pomelnice.submit : pg.common.request}
-                  <Icon name="arrow" size={15} />
+                  <Icon name="arrow" size={16} />
                 </a>
               </div>
             </article>
@@ -68,35 +60,31 @@ const hours = pg.contact.hours[0];
     </div>
   </section>
 
-  <section class="reveal section section--band" id="cerere">
-    <div class="container split split--form">
-      <div>
-        <SectionHead eyebrow={s.formEyebrow} title={s.formTitle} />
-        <p class="lede">{s.formText}</p>
-        <ol class="steps">
-          {s.steps.map((step, i) => (
-            <li class="steps__item">
-              <span class="steps__num">{i + 1}</span>
-              <span class="steps__text">{step}</span>
-            </li>
-          ))}
-        </ol>
-        <div class="card office-card">
-          <h3 class="aside-card__title"><Icon name="home" size={20} />{s.officeTitle}</h3>
-          <ul class="contact-lines">
-            <li><Icon name="clock" size={18} /><span>{hours.value}</span></li>
-            <li><Icon name="phone" size={18} /><a href={`tel:${siteConfig.phone.replace(/\D/g, '')}`}>{siteConfig.phone}</a></li>
-            <li><Icon name="mail" size={18} /><a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="card card--gold form-card">
+  <section class="section section--paper" id="cerere">
+    <div class="container split split--form reveal">
+      <div class="card form-card" style="background:var(--cream)">
+        <p class="eyebrow">{s.formEyebrow}</p>
+        <h2 class="form-card__title">{s.formTitle}</h2>
+        <Motif />
+        <p class="form-intro">{s.formText}</p>
         <RequestForm locale={locale} />
       </div>
+      <aside class="aside-panel">
+        <p class="eyebrow">{s.introEyebrow}</p>
+        <h2>{s.officeTitle}</h2>
+        <ol class="steps steps--light">
+          {s.steps.map((step) => <li>{step}</li>)}
+        </ol>
+        <ul class="aside-list">
+          <li><Icon name="clock" size={18} /><span>{hours.value}</span></li>
+          <li><Icon name="phone" size={18} /><a href={`tel:${siteConfig.phone.replace(/\D/g, '')}`}>{siteConfig.phone}</a></li>
+          <li><Icon name="mail" size={18} /><a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a></li>
+        </ul>
+      </aside>
     </div>
   </section>
 
-  <CtaBand
+  <PhotoBand
     image={{ src: images.pages.pomelnice.src, alt: images.pages.pomelnice.alt[locale] }}
     eyebrow={s.ctaEyebrow}
     title={s.ctaTitle}

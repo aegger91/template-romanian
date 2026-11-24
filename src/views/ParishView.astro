@@ -1,11 +1,10 @@
 ---
 import type { Locale } from '../config/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PageHero from '../components/PageHero.astro';
-import SubNav from '../components/SubNav.astro';
-import SectionHead from '../components/SectionHead.astro';
-import Ornament from '../components/Ornament.astro';
-import CtaBand from '../components/CtaBand.astro';
+import PageBanner from '../components/PageBanner.astro';
+import Heading from '../components/Heading.astro';
+import Motif from '../components/Motif.astro';
+import PhotoBand from '../components/PhotoBand.astro';
 import Icon from '../components/Icon.astro';
 import { siteConfig } from '../config/site';
 import { images } from '../config/images';
@@ -13,7 +12,7 @@ import { nextFeast } from '../config/schedule';
 import { t } from '../i18n/ui';
 import { p } from '../i18n/pages';
 import { displayDates } from '../utils/dates';
-import { parishTabs, crumbs } from './nav';
+import { crumbs } from './nav';
 
 interface Props {
   locale: Locale;
@@ -23,39 +22,35 @@ const dict = t(locale);
 const pg = p(locale);
 const c = pg.parish;
 const m = images.media;
-const img = (k: keyof typeof m) => ({ src: m[k].src, alt: m[k].alt[locale] });
 const feast = displayDates(nextFeast.date, locale);
 const explore = [
-  { href: dict.paths.history, title: dict.nav.history, text: c.cards.history, image: img('frescoVoronet') },
-  { href: dict.paths.clergy, title: dict.nav.clergy, text: c.cards.clergy, image: img('stelea') },
-  { href: dict.paths.gallery, title: dict.nav.gallery, text: c.cards.gallery, image: img('frescoMoldovita') },
-  { href: dict.paths.sacraments, title: dict.nav.sacraments, text: c.cards.sacraments, image: img('iconostasis') },
+  { href: dict.paths.history, title: dict.nav.history, text: c.cards.history, image: m.frescoVoronet },
+  { href: dict.paths.clergy, title: dict.nav.clergy, text: c.cards.clergy, image: m.stelea },
+  { href: dict.paths.gallery, title: dict.nav.gallery, text: c.cards.gallery, image: m.frescoMoldovita },
+  { href: dict.paths.sacraments, title: dict.nav.sacraments, text: c.cards.sacraments, image: m.iconostasis },
 ];
 ---
 <BaseLayout locale={locale} title={dict.parish.title} current="parish" description={c.lede}>
-  <PageHero
+  <PageBanner
     image={{ src: images.pages.parish.src, alt: images.pages.parish.alt[locale] }}
     eyebrow={siteConfig.tagline[locale]}
     title={dict.parish.title}
     lede={c.lede}
     crumbs={crumbs(locale, [{ label: dict.nav.parish }])}
     crumbLabel={pg.common.breadcrumb}
-    icon={img('iconNicholasGlass')}
   />
-  <SubNav items={parishTabs(locale, 'parish')} label={pg.common.sectionNav} />
 
   {siteConfig.features.aboutBlock && (
-    <section class="reveal section">
-      <div class="container split split--media-end">
-        <div class="split__text">
-          <SectionHead eyebrow={c.welcomeEyebrow} title={c.welcomeTitle} />
+    <section class="section">
+      <div class="container split reveal">
+        <div>
+          <p class="eyebrow">{c.welcomeEyebrow}</p>
+          <h2>{c.welcomeTitle}</h2>
+          <Motif />
           <p class="lede">{c.welcomeText}</p>
-          <dl class="facts">
+          <dl class="stats">
             {c.facts.map((f) => (
-              <div class="facts__item">
-                <dt>{f.label}</dt>
-                <dd>{f.value}</dd>
-              </div>
+              <div><dt>{f.label}</dt><dd>{f.value}</dd></div>
             ))}
           </dl>
           <div class="btn-row">
@@ -63,89 +58,79 @@ const explore = [
             <a class="btn btn-secondary" href={dict.paths.contact}>{dict.nav.contact}</a>
           </div>
         </div>
-        <div class="layered">
-          <div class="media-frame media-frame--arch layered__main">
-            <img src={m.humor.src} alt={m.humor.alt[locale]} width="1200" height="900" loading="lazy" />
-          </div>
-          <div class="layered__card">
-            <img src="/icons/cross-trefoil.svg" alt="" width="18" height="18" />
-            <div>
-              <p class="layered__label">{c.patronEyebrow}</p>
-              <p class="layered__value">{c.patronTitle}</p>
-            </div>
-          </div>
-        </div>
+        <figure class="figure figure--wide">
+          <img src={m.humor.src} alt={m.humor.alt[locale]} width={m.humor.w} height={m.humor.h} loading="lazy" />
+          <figcaption>{m.humor.alt[locale]}</figcaption>
+        </figure>
       </div>
     </section>
   )}
 
-  <section class="reveal section section--band">
-    <div class="container">
-      <SectionHead eyebrow={c.exploreEyebrow} title={c.exploreTitle} lede={c.exploreLede} />
-      <div class="photo-cards">
+  <section class="section section--paper">
+    <div class="container reveal">
+      <Heading eyebrow={c.exploreEyebrow} title={c.exploreTitle} lede={c.exploreLede} />
+      <div class="grid grid-4">
         {explore.map((card) => (
-          <a class="photo-card card--lift" href={card.href}>
-            <span class="photo-card__media">
-              <img src={card.image.src} alt="" width="1200" height="900" loading="lazy" />
-            </span>
-            <span class="photo-card__body">
-              <span class="photo-card__title">{card.title}</span>
-              <span class="photo-card__text">{card.text}</span>
-              <span class="photo-card__more">{pg.common.learnMore} <Icon name="arrow" size={16} /></span>
-            </span>
+          <a class="pcard" href={card.href}>
+            <div class="pcard__media">
+              <img src={card.image.src} alt="" width={card.image.w} height={card.image.h} loading="lazy" />
+            </div>
+            <div class="pcard__body">
+              <h3 class="card__title">{card.title}</h3>
+              <p class="card__text">{card.text}</p>
+              <span class="link-arrow">{pg.common.learnMore} <Icon name="arrow" size={16} /></span>
+            </div>
           </a>
         ))}
       </div>
     </div>
   </section>
 
-  <section class="reveal section section--dark section--ornate">
-    <div class="container split split--icon">
-      <figure class="icon-frame">
-        <img src={m.iconNicholas.src} alt={m.iconNicholas.alt[locale]} width="900" height="1200" loading="lazy" />
-        <figcaption>{c.patronIconCaption}</figcaption>
-      </figure>
-      <div>
-        <SectionHead eyebrow={c.patronEyebrow} title={c.patronTitle} light />
-        <p class="lede lede--light">{c.patronText}</p>
-        <div class="date-badge">
-          <span class="date-badge__label">{dict.home.nextFeast}</span>
-          <span class="date-badge__value">{feast.primary}</span>
-          <span class="date-badge__meta">{nextFeast.startTime}-{nextFeast.endTime} · {nextFeast.description[locale]}</span>
-          {feast.secondary && <span class="date-badge__meta">{dict.schedule.oldStyleLabel}: {feast.secondary}</span>}
+  <section class="section">
+    <div class="container reveal">
+      <div class="feature">
+        <div class="feature__media feature__media--icon">
+          <img src={m.iconNicholas.src} alt={m.iconNicholas.alt[locale]} width={m.iconNicholas.w} height={m.iconNicholas.h} loading="lazy" />
         </div>
-        <a class="btn btn-gold" href={dict.paths.schedule}>{c.patronCta}</a>
+        <div class="feature__body">
+          <p class="eyebrow">{c.patronEyebrow}</p>
+          <h2>{c.patronTitle}</h2>
+          <Motif />
+          <p class="lede">{c.patronText}</p>
+          <div class="date-line">
+            <span>{dict.home.nextFeast}</span>
+            <strong>{feast.primary}</strong>
+            <span>{nextFeast.startTime}-{nextFeast.endTime} · {nextFeast.description[locale]}</span>
+            {feast.secondary && <span class="old-style">{dict.schedule.oldStyleLabel}: {feast.secondary}</span>}
+          </div>
+          <div class="btn-row">
+            <a class="btn btn-primary" href={dict.paths.schedule}>{c.patronCta}</a>
+          </div>
+          <p class="small muted" style="margin:1.25rem 0 0">{c.patronIconCaption}</p>
+        </div>
       </div>
     </div>
   </section>
 
   {siteConfig.features.visitingBlock && (
-    <section class="reveal section">
-      <div class="container split">
-        <div class="media-frame media-frame--tall">
-          <img src={m.voronet.src} alt={m.voronet.alt[locale]} width="1200" height="900" loading="lazy" />
+    <section class="section section--paper">
+      <div class="container reveal">
+        <Heading eyebrow={c.visitEyebrow} title={c.visitTitle} lede={c.visitText} />
+        <div class="grid grid-4">
+          {c.visitItems.map((it) => (
+            <div class="card">
+              <span class="icon-badge"><Icon name={it.icon} size={20} /></span>
+              <h3 class="card__title" style="font-size:1.2rem">{it.title}</h3>
+              <p class="card__text">{it.text}</p>
+            </div>
+          ))}
         </div>
-        <div>
-          <SectionHead eyebrow={c.visitEyebrow} title={c.visitTitle} />
-          <p class="lede">{c.visitText}</p>
-          <ul class="info-tiles">
-            {c.visitItems.map((it) => (
-              <li class="info-tile">
-                <span class="info-tile__icon"><Icon name={it.icon} size={22} /></span>
-                <span>
-                  <span class="info-tile__title">{it.title}</span>
-                  <span class="info-tile__text">{it.text}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-          <a class="section-link" href={dict.paths.contact}>{dict.contact.title} →</a>
-        </div>
+        <p class="section-foot"><a class="link-arrow" href={dict.paths.contact}>{dict.contact.title} <Icon name="arrow" size={16} /></a></p>
       </div>
     </section>
   )}
 
-  <CtaBand
+  <PhotoBand
     image={{ src: images.pages.schedule.src, alt: images.pages.schedule.alt[locale] }}
     eyebrow={c.ctaEyebrow}
     title={c.ctaTitle}

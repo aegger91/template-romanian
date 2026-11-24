@@ -1,19 +1,18 @@
 ---
 import type { Locale } from '../config/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PageHero from '../components/PageHero.astro';
-import SubNav from '../components/SubNav.astro';
-import SectionHead from '../components/SectionHead.astro';
+import PageBanner from '../components/PageBanner.astro';
+import Heading from '../components/Heading.astro';
 import ScheduleList from '../components/ScheduleList.astro';
-import CtaBand from '../components/CtaBand.astro';
+import PhotoBand from '../components/PhotoBand.astro';
 import Pictogram from '../components/Pictogram.astro';
 import Icon from '../components/Icon.astro';
 import { siteConfig } from '../config/site';
 import { images } from '../config/images';
-import { weeklyServices, upcomingEvents } from '../config/schedule';
+import { thisWeekServices, weeklyServices, upcomingEvents } from '../config/schedule';
 import { t } from '../i18n/ui';
 import { p } from '../i18n/pages';
-import { serviceTabs, crumbs } from './nav';
+import { crumbs } from './nav';
 
 interface Props {
   locale: Locale;
@@ -24,9 +23,10 @@ const pg = p(locale);
 const s = pg.schedule;
 const calendarLabel = siteConfig.calendarStyle === 'old' ? dict.schedule.calendarOld : dict.schedule.calendarNew;
 const teaser = pg.sacraments.items.slice(0, 4);
+const m = images.media;
 ---
 <BaseLayout locale={locale} title={dict.schedule.title} current="schedule" description={s.lede}>
-  <PageHero
+  <PageBanner
     image={{ src: images.pages.schedule.src, alt: images.pages.schedule.alt[locale] }}
     eyebrow={dict.nav.schedule}
     title={dict.schedule.title}
@@ -34,70 +34,78 @@ const teaser = pg.sacraments.items.slice(0, 4);
     crumbs={crumbs(locale, [{ label: dict.nav.schedule }])}
     crumbLabel={pg.common.breadcrumb}
   >
-    <p class="phero__badges"><span class="calendar-badge calendar-badge--light">{calendarLabel}</span></p>
-  </PageHero>
-  <SubNav items={serviceTabs(locale, 'schedule')} label={pg.common.sectionNav} />
+    <span class="calendar-badge calendar-badge--light">{calendarLabel}</span>
+  </PageBanner>
 
-  <section class="reveal section">
-    <div class="container">
-      <SectionHead eyebrow={s.weekEyebrow} title={s.weekTitle}>
-        <span slot="aside" class="calendar-badge">{calendarLabel}</span>
-      </SectionHead>
-      <p class="form-note" style="margin-top:-0.75rem;margin-bottom:1.25rem;">{s.weekHint}</p>
+  <section class="section">
+    <div class="container reveal">
+      <Heading eyebrow={pg.home.weeklyEyebrow} title={pg.home.weeklyTitle} lede={s.weeklyNote} />
+      <ScheduleList locale={locale} items={thisWeekServices} layout="cards" liveLabel={pg.home.live} narrow />
+    </div>
+  </section>
+
+  <section class="section section--paper">
+    <div class="container reveal">
+      <Heading eyebrow={s.weekEyebrow} title={s.weekTitle} lede={s.weekHint}>
+        <span class="calendar-badge">{calendarLabel}</span>
+      </Heading>
       <ScheduleList locale={locale} items={weeklyServices} layout="calendar" labels={{ today: s.today, empty: s.noServices }} />
     </div>
   </section>
 
-  <section class="reveal section section--band">
-    <div class="container split split--aside">
+  <section class="section">
+    <div class="container split split--form reveal">
       <div>
-        <SectionHead eyebrow={s.eventsEyebrow} title={s.eventsTitle} />
+        <Heading eyebrow={s.eventsEyebrow} title={s.eventsTitle} align="left" />
         <ScheduleList locale={locale} items={upcomingEvents} layout="list" />
       </div>
-      <aside class="aside-stack">
-        <div class="card card--gold aside-card">
-          <h3 class="aside-card__title"><Icon name="calendar" size={20} />{s.weeklyTitle}</h3>
+      <div class="stack stack--sticky">
+        <div class="card">
+          <h3 class="card__title" style="font-size:1.25rem">{s.weeklyTitle}</h3>
           <ScheduleList locale={locale} items={weeklyServices} layout="compact" weekly />
-          <p class="form-note" style="margin:0.85rem 0 0;">{s.weeklyNote}</p>
         </div>
-        <a class="mini-card" href={dict.paths.livestream}>
-          <span class="mini-card__media"><img src={images.media.stelea.src} alt="" width="900" height="1200" loading="lazy" /></span>
-          <span class="mini-card__body">
-            <span class="mini-card__title"><span class="live-dot" aria-hidden="true"></span>{s.liveTitle}</span>
-            <span class="mini-card__text">{s.liveText}</span>
-            <span class="photo-card__more">{s.liveCta} <Icon name="arrow" size={16} /></span>
-          </span>
+        <a class="pcard" href={dict.paths.livestream}>
+          <div class="pcard__media" style="aspect-ratio:16/7">
+            <img src={m.stelea.src} alt="" width={m.stelea.w} height={m.stelea.h} loading="lazy" style="object-position:center 30%" />
+          </div>
+          <div class="pcard__body">
+            <h3 class="card__title" style="font-size:1.25rem"><span class="live-dot" aria-hidden="true" style="margin-right:0.5rem;vertical-align:3px"></span>{s.liveTitle}</h3>
+            <p class="card__text">{s.liveText}</p>
+            <span class="link-arrow">{s.liveCta} <Icon name="arrow" size={16} /></span>
+          </div>
         </a>
-        <a class="mini-card" href={dict.paths.pomelnice}>
-          <span class="mini-card__media"><img src={images.media.candles.src} alt="" width="900" height="1200" loading="lazy" /></span>
-          <span class="mini-card__body">
-            <span class="mini-card__title">{s.namesTitle}</span>
-            <span class="mini-card__text">{s.namesText}</span>
-            <span class="photo-card__more">{s.namesCta} <Icon name="arrow" size={16} /></span>
-          </span>
+        <a class="pcard" href={dict.paths.pomelnice}>
+          <div class="pcard__media" style="aspect-ratio:16/7">
+            <img src={m.candles.src} alt="" width={m.candles.w} height={m.candles.h} loading="lazy" />
+          </div>
+          <div class="pcard__body">
+            <h3 class="card__title" style="font-size:1.25rem">{s.namesTitle}</h3>
+            <p class="card__text">{s.namesText}</p>
+            <span class="link-arrow">{s.namesCta} <Icon name="arrow" size={16} /></span>
+          </div>
         </a>
-      </aside>
+      </div>
     </div>
   </section>
 
-  <section class="reveal section section--dark section--ornate">
-    <div class="container">
-      <SectionHead eyebrow={s.sacramentsEyebrow} title={s.sacramentsTitle} lede={s.sacramentsText} light>
-        <a slot="aside" class="btn btn-gold" href={dict.paths.sacraments}>{s.sacramentsCta}</a>
-      </SectionHead>
-      <div class="glass-grid glass-grid--4">
+  <section class="section section--paper">
+    <div class="container reveal">
+      <Heading eyebrow={s.sacramentsEyebrow} title={s.sacramentsTitle} lede={s.sacramentsText} />
+      <div class="grid grid-4">
         {teaser.map((it) => (
-          <a class="glass-card glass-card--link" href={`${dict.paths.sacraments}#${it.id}`}>
-            <span class="glass-card__picto"><Pictogram name={it.icon} size={56} /></span>
-            <h3>{it.title}</h3>
-            <p>{it.text}</p>
+          <a class="card card--link card--flex" href={`${dict.paths.sacraments}#${it.id}`}>
+            <span class="rite__picto"><Pictogram name={it.icon} size={48} /></span>
+            <h3 class="card__title">{it.title}</h3>
+            <p class="card__text">{it.text}</p>
+            <span class="card__foot link-arrow">{pg.common.learnMore} <Icon name="arrow" size={16} /></span>
           </a>
         ))}
       </div>
+      <p class="section-foot"><a class="btn btn-primary" href={dict.paths.sacraments}>{s.sacramentsCta}</a></p>
     </div>
   </section>
 
-  <CtaBand
+  <PhotoBand
     image={{ src: images.pages.livestream.src, alt: images.pages.livestream.alt[locale] }}
     eyebrow={s.ctaEyebrow}
     title={s.ctaTitle}
