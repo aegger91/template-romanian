@@ -8,9 +8,27 @@ export const siteConfig = {
     ro: 'Parohia Sfântul Nicolae',
     en: 'Saint Nicholas Parish',
   },
+  /** Two lines shown beside the church mark in the header and footer */
+  nameLines: {
+    ro: ['Parohia Ortodoxă', 'Sfântul Nicolae'],
+    en: ['Saint Nicholas', 'Orthodox Parish'],
+  },
   shortName: {
     ro: 'Sf. Nicolae',
     en: 'St. Nicholas',
+  },
+  /** Short service hours shown at the top left of the header */
+  hours: {
+    ro: [
+      { day: 'Duminică', time: 'Utrenia 07:30 · Liturghia 09:00' },
+      { day: 'Sâmbătă', time: 'Vecernia 17:00' },
+      { day: 'Miercuri', time: 'Acatistul 18:00' },
+    ],
+    en: [
+      { day: 'Sunday', time: 'Matins 07:30 · Liturgy 09:00' },
+      { day: 'Saturday', time: 'Vespers 17:00' },
+      { day: 'Wednesday', time: 'Akathist 18:00' },
+    ],
   },
   tagline: {
     ro: 'Biserica Ortodoxă Română',

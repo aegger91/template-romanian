@@ -11,6 +11,8 @@ export type ScheduleItem = {
   startTime: string; // HH:mm
   endTime: string;
   location?: { ro: string; en: string };
+  /** Marks services that are streamed on the livestream page */
+  live?: boolean;
 };
 
 /** Offset in days: Old Style (Julian) is typically 13 days behind New Style */
@@ -38,6 +40,7 @@ const thisWeekServicesRaw: ScheduleItem[] = [
     date: nextWeekdayDate(6),
     startTime: '17:00',
     endTime: '18:00',
+    live: true,
   },
   {
     id: 'liturgy-sun',
@@ -49,6 +52,7 @@ const thisWeekServicesRaw: ScheduleItem[] = [
     date: nextWeekdayDate(0),
     startTime: '09:00',
     endTime: '11:00',
+    live: true,
   },
 ];
 

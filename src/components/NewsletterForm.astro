@@ -4,14 +4,16 @@ import { p } from '../i18n/pages';
 
 interface Props {
   locale: Locale;
+  id?: string;
+  button?: string;
 }
-const { locale } = Astro.props;
+const { locale, id = 'newsletter-email', button = 'btn-gold' } = Astro.props;
 const n = p(locale).news;
 ---
 <form class="newsletter" data-newsletter novalidate>
-  <label for="newsletter-email" class="sr-only">{n.newsletterLabel}</label>
-  <input id="newsletter-email" name="email" type="email" autocomplete="email" placeholder={n.newsletterLabel} required />
-  <button type="submit" class="btn btn-gold">{n.newsletterCta}</button>
+  <label for={id} class="sr-only">{n.newsletterLabel}</label>
+  <input id={id} name="email" type="email" autocomplete="email" placeholder={n.newsletterLabel} required />
+  <button type="submit" class:list={['btn', button]}>{n.newsletterCta}</button>
   <p class="newsletter__success" data-form-success hidden tabindex="-1">{n.newsletterSuccess}</p>
 </form>
 

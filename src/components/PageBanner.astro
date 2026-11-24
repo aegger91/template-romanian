@@ -1,0 +1,39 @@
+---
+interface Crumb {
+  label: string;
+  href?: string;
+}
+interface Props {
+  image: { src: string; alt: string };
+  title: string;
+  eyebrow?: string;
+  lede?: string;
+  crumbs: Crumb[];
+  crumbLabel: string;
+  position?: string;
+}
+const { image, title, eyebrow, lede, crumbs, crumbLabel, position = 'center' } = Astro.props;
+---
+<div class="container">
+  <nav class="crumbs" aria-label={crumbLabel}>
+    <ol>
+      {crumbs.map((c, i) => (
+        <li>
+          {c.href && i < crumbs.length - 1 ? <a href={c.href}>{c.label}</a> : <span aria-current="page">{c.label}</span>}
+        </li>
+      ))}
+    </ol>
+  </nav>
+  <header class="banner">
+    <div class="banner__media">
+      <img src={image.src} alt={image.alt} width="1920" height="960" fetchpriority="high" style={`object-position:${position};`} />
+    </div>
+    <div class="banner__tint"></div>
+    <div class="banner__body">
+      {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+      <h1 class="banner__title">{title}</h1>
+      {lede && <p class="banner__lede">{lede}</p>}
+      {Astro.slots.has('default') && <div class="banner__meta"><slot /></div>}
+    </div>
+  </header>
+</div>

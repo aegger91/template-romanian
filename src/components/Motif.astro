@@ -1,0 +1,21 @@
+---
+/** Fine gold rule with a small embroidery rhomb at its center. */
+interface Props {
+  center?: boolean;
+  light?: boolean;
+}
+const { center = false, light = false } = Astro.props;
+---
+<svg
+  class:list={['motif', { 'motif--center': center, 'motif--light': light }]}
+  viewBox="0 0 120 12"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1"
+  aria-hidden="true"
+>
+  <path d="M0 6H47M73 6H120" />
+  <path d="M60 1.2 64.8 6 60 10.8 55.2 6Z" />
+  <path d="M60 4 62 6 60 8 58 6Z" fill="currentColor" stroke="none" />
+  <path d="M50.5 6l1.5-1.5 1.5 1.5-1.5 1.5zM66.5 6l1.5-1.5 1.5 1.5-1.5 1.5z" fill="currentColor" stroke="none" />
+</svg>

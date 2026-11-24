@@ -3,6 +3,7 @@ import type { Locale } from '../config/site';
 import { siteConfig } from '../config/site';
 import { t } from '../i18n/ui';
 import { p } from '../i18n/pages';
+import OrthodoxCross from './OrthodoxCross.astro';
 
 interface Props {
   locale: Locale;
@@ -27,14 +28,14 @@ const showProgress =
       <div class="names-grid">
         <div class="field names-card names-card--living">
           <label for="living">
-            <span class="names-card__cross" aria-hidden="true"><img src="/icons/cross-trefoil.svg" alt="" width="14" height="14" /></span>
+            <span class="names-card__cross"><OrthodoxCross size={16} /></span>
             {copy.living}
           </label>
           <textarea id="living" name="living" rows="6" placeholder={dict.pomelnice.names}></textarea>
         </div>
         <div class="field names-card names-card--departed">
           <label for="departed">
-            <span class="names-card__cross" aria-hidden="true"><img src="/icons/cross-trefoil.svg" alt="" width="14" height="14" /></span>
+            <span class="names-card__cross"><OrthodoxCross size={16} /></span>
             {copy.departed}
           </label>
           <textarea id="departed" name="departed" rows="6" placeholder={dict.pomelnice.names}></textarea>

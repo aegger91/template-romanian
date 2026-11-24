@@ -1,0 +1,21 @@
+---
+/** Three-bar Orthodox cross; the slanted footrest is higher on the viewer's left. */
+interface Props {
+  size?: number;
+  class?: string;
+}
+const { size = 16, class: className = '' } = Astro.props;
+---
+<svg
+  class={className}
+  width={Math.round(size * 0.75)}
+  height={size}
+  viewBox="0 0 24 32"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.8"
+  stroke-linecap="round"
+  aria-hidden="true"
+>
+  <path d="M12 2v28M8.5 7h7M4 13h16M7.5 21l9 4" />
+</svg>

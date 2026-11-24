@@ -3,6 +3,7 @@ import type { Locale } from '../config/site';
 import { siteConfig } from '../config/site';
 import { t } from '../i18n/ui';
 import LanguageSwitcher from './LanguageSwitcher.astro';
+import ChurchMark from './ChurchMark.astro';
 
 interface Props {
   locale: Locale;
@@ -10,70 +11,156 @@ interface Props {
 }
 const { locale, current = 'home' } = Astro.props;
 const dict = t(locale);
-const name = siteConfig.name[locale];
-const tag = siteConfig.tagline[locale];
+const lines = siteConfig.nameLines[locale];
+const addr = siteConfig.address;
+const path = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
 
-const links = [
+type Item = { key: string; href: string; label: string; children?: { href: string; label: string }[]; donate?: boolean };
+const items: Item[] = [
   { key: 'home', href: dict.paths.home, label: dict.nav.home },
-  { key: 'parish', href: dict.paths.parish, label: dict.nav.parish },
-  { key: 'schedule', href: dict.paths.schedule, label: dict.nav.schedule },
+  {
+    key: 'parish',
+    href: dict.paths.parish,
+    label: dict.nav.parish,
+    children: [
+      { href: dict.paths.parish, label: dict.nav.about },
+      { href: dict.paths.history, label: dict.nav.history },
+      { href: dict.paths.clergy, label: dict.nav.clergy },
+      { href: dict.paths.gallery, label: dict.nav.gallery },
+    ],
+  },
+  {
+    key: 'schedule',
+    href: dict.paths.schedule,
+    label: dict.nav.schedule,
+    children: [
+      { href: dict.paths.schedule, label: dict.schedule.title },
+      { href: dict.paths.sacraments, label: dict.nav.sacraments },
+      { href: dict.paths.pomelnice, label: dict.nav.pomelnice },
+    ],
+  },
   { key: 'news', href: dict.paths.news, label: dict.nav.news },
   { key: 'livestream', href: dict.paths.livestream, label: dict.nav.livestream },
-  { key: 'pomelnice', href: dict.paths.pomelnice, label: dict.nav.pomelnice },
   { key: 'contact', href: dict.paths.contact, label: dict.nav.contact },
-] as const;
+  { key: 'donate', href: dict.paths.donate, label: dict.nav.donate, donate: true },
+];
+const isPage = (href: string) => (href === path ? 'page' : undefined);
+const group = current === 'pomelnice' ? 'schedule' : current;
 ---
-<header class="site-header">
-  <div class="container site-header__inner">
+<header class="masthead">
+  <div class="container masthead__top">
+    <div class="masthead__hours">
+      {siteConfig.hours[locale].map((h) => (
+        <p><strong>{h.day}</strong> · {h.time}</p>
+      ))}
+    </div>
+
     <a class="brand" href={dict.paths.home}>
-      <span class="brand__mark" aria-hidden="true">
-        <img src="/icons/cross-trefoil.svg" alt="" width="20" height="20" />
-      </span>
-      <span class="brand__text">
-        <span class="brand__name">{name}</span>
-        <span class="brand__tag">{tag}</span>
+      <ChurchMark />
+      <span class="brand__name">
+        <span>{lines[0]}</span>
+        <span>{lines[1]}</span>
       </span>
     </a>
 
-    <nav class="nav" aria-label="Main">
-      {links.map((link) => (
-        <a href={link.href} aria-current={current === link.key ? 'page' : undefined}>{link.label}</a>
-      ))}
-    </nav>
-
-    <div class="header-tools">
+    <div class="masthead__contact">
+      <p>{addr.street}, {addr.city}</p>
+      <p><a class="masthead__phone" href={`tel:${siteConfig.phone.replace(/\D/g, '')}`}>{siteConfig.phone}</a></p>
+      <p><a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a></p>
       <LanguageSwitcher locale={locale} />
-      <a class="btn btn-gold header-donate" href={dict.paths.donate}>{dict.nav.donate}</a>
-      <button
-        class="menu-toggle"
-        type="button"
-        aria-expanded="false"
-        aria-controls="mobile-nav"
-        data-menu-toggle
-      >
-        <span class="sr-only">{dict.nav.menu}</span>
-        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M4 7h16M4 12h16M4 17h16"></path>
-        </svg>
-      </button>
     </div>
   </div>
 
-  <div class="container">
-    <nav class="mobile-nav" id="mobile-nav" data-mobile-nav aria-label="Mobile">
-      {links.map((link) => (
-        <a href={link.href} aria-current={current === link.key ? 'page' : undefined}>{link.label}</a>
-      ))}
-      <a href={dict.paths.donate}>{dict.nav.donate}</a>
-    </nav>
+  <div class="container masthead__bar">
+    <a class="brand brand--sm" href={dict.paths.home}>
+      <ChurchMark />
+      <span class="brand__name">
+        <span>{lines[0]}</span>
+        <span>{lines[1]}</span>
+      </span>
+    </a>
+    <LanguageSwitcher locale={locale} />
+    <details class="mnav" data-mnav>
+      <summary aria-label={dict.nav.menu}>
+        <svg class="mnav__open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7.5h16M4 12h16M4 16.5h16" /></svg>
+        <svg class="mnav__close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+      </summary>
+      <div class="mnav__panel">
+        <nav class="container" aria-label={dict.nav.menu}>
+          <ul class="mnav__list">
+            {items.map((item) => (
+              <li class:list={{ mnav__donate: item.donate }}>
+                <a href={item.href} aria-current={isPage(item.href)}>{item.label}</a>
+                {item.children && (
+                  <ul class="mnav__sub">
+                    {item.children.slice(1).map((c) => (
+                      <li><a href={c.href} aria-current={isPage(c.href)}>{c.label}</a></li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ul>
+          <div class="mnav__lang">
+            <span>{dict.nav.lang}</span>
+            <LanguageSwitcher locale={locale} />
+          </div>
+        </nav>
+      </div>
+    </details>
   </div>
 </header>
 
+<div class="navbar" data-navbar>
+  <div class="container">
+    <div class="gold-rule"></div>
+    <nav class="mainnav" aria-label={locale === 'ro' ? 'Principal' : 'Main'}>
+      <ul class="mainnav__list">
+        {items.map((item) => (
+          <li class:list={['mainnav__item', { 'is-current': group === item.key, mainnav__donate: item.donate }]}>
+            <a class="mainnav__link" href={item.href} aria-current={isPage(item.href)}>
+              {item.label}
+              {item.children && (
+                <svg class="mainnav__caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" /></svg>
+              )}
+            </a>
+            {item.children && (
+              <ul class="mainnav__sub">
+                {item.children.map((c) => (
+                  <li><a href={c.href} aria-current={isPage(c.href)}>{c.label}</a></li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+</div>
+
 <script>
-  const toggle = document.querySelector('[data-menu-toggle]');
-  const panel = document.querySelector('[data-mobile-nav]');
-  toggle?.addEventListener('click', () => {
-    const open = panel?.classList.toggle('is-open');
-    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-  });
+  const bar = document.querySelector<HTMLElement>('[data-navbar]');
+  if (bar && 'IntersectionObserver' in window) {
+    const sentinel = document.createElement('div');
+    sentinel.setAttribute('aria-hidden', 'true');
+    bar.before(sentinel);
+    new IntersectionObserver(([entry]) => bar.classList.toggle('is-stuck', !entry.isIntersecting)).observe(sentinel);
+  }
+
+  const menu = document.querySelector<HTMLDetailsElement>('[data-mnav]');
+  if (menu) {
+    const summary = menu.querySelector('summary');
+    const sync = () => summary?.setAttribute('aria-expanded', menu.open ? 'true' : 'false');
+    sync();
+    menu.addEventListener('toggle', sync);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menu.open) {
+        menu.open = false;
+        summary?.focus();
+      }
+    });
+    window.matchMedia('(min-width: 1024px)').addEventListener('change', (e) => {
+      if (e.matches) menu.open = false;
+    });
+  }
 </script>

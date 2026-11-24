@@ -10,12 +10,15 @@ import Icon from './Icon.astro';
 interface Props {
   locale: Locale;
   items: ScheduleItem[];
-  layout?: 'week' | 'list' | 'calendar' | 'compact';
+  layout?: 'tile' | 'cards' | 'list' | 'calendar' | 'compact';
   /** compact layout: label rows by weekday instead of date */
   weekly?: boolean;
   labels?: { today: string; empty: string };
+  /** cards layout: label for services that are streamed */
+  liveLabel?: string;
+  narrow?: boolean;
 }
-const { locale, items, layout = 'list', weekly = false, labels } = Astro.props;
+const { locale, items, layout = 'list', weekly = false, labels, liveLabel, narrow = false } = Astro.props;
 const dict = t(locale);
 const parish = siteConfig.name[locale];
 const tag = locale === 'ro' ? 'ro-RO' : 'en-GB';
@@ -24,6 +27,15 @@ const uid = `sch-${Math.random().toString(36).slice(2, 8)}`;
 const toDate = (iso: string) => {
   const [y, m, d] = iso.split('-').map(Number);
   return new Date(y, m - 1, d, 12);
+};
+
+const cap = (s: string) => s.charAt(0).toLocaleUpperCase(tag) + s.slice(1);
+
+const iconFor = (id: string) => {
+  if (id.startsWith('liturgy')) return 'church';
+  if (id.startsWith('vespers') || id.startsWith('matins')) return 'candle';
+  if (id.startsWith('unction') || id.startsWith('paraklesis')) return 'hands';
+  return 'music';
 };
 
 const payload = items.map((item) => {
@@ -38,16 +50,21 @@ const payload = items.map((item) => {
     shortDate: formatShortDate(item.date, locale),
     dayNum: String(dt.getDate()),
     dayName: dt.toLocaleDateString(tag, { weekday: 'short' }),
-    weekdayLong: dt.toLocaleDateString(tag, { weekday: 'long' }),
-    monthShort: dt.toLocaleDateString(tag, { month: 'short' }),
+    weekdayLong: cap(dt.toLocaleDateString(tag, { weekday: 'long' })),
+    monthShort: dt.toLocaleDateString(tag, { month: 'short' }).replace('.', ''),
     oldStyleLabel: dates.secondary,
+    start: item.startTime,
     time: `${item.startTime}-${item.endTime}`,
     location: item.location?.[locale] ?? parish,
+    live: Boolean(item.live),
+    icon: iconFor(item.id),
     ics: buildIcs(item, locale, parish),
     google: googleCalendarUrl(item, locale, parish),
     map: siteConfig.mapUrl,
   };
 });
+
+const clientPayload = payload.map(({ icon, live, start, ...rest }) => rest);
 
 const today = nextDays(1)[0];
 const calendarDays =
@@ -60,25 +77,50 @@ const calendarDays =
           dow: dt.toLocaleDateString(tag, { weekday: 'short' }),
           dowLong: dt.toLocaleDateString(tag, { weekday: 'long' }),
           num: String(dt.getDate()),
-          month: dt.toLocaleDateString(tag, { month: 'short' }),
+          month: dt.toLocaleDateString(tag, { month: 'short' }).replace('.', ''),
           items: payload.filter((p) => p.date === iso),
         };
       })
     : [];
 ---
 <div data-schedule-root={uid}>
-  {layout === 'week' && (
-    <div class="schedule-week">
+  {layout === 'tile' && (
+    <ul class="next-list">
       {payload.map((item) => (
-        <button type="button" class="schedule-card" data-schedule-open={item.id} aria-haspopup="dialog">
-          <div class="schedule-card__day">{item.dayName}</div>
-          <div class="schedule-card__date">{item.dayNum}</div>
-          <div class="schedule-card__time">{item.time}</div>
-          <h3>{item.title}</h3>
-          {item.oldStyleLabel && <div class="schedule-card__old">{dict.schedule.oldStyleLabel}: {item.oldStyleLabel}</div>}
-        </button>
+        <li>
+          <button type="button" class="next-item" data-schedule-open={item.id} aria-haspopup="dialog">
+            <span class="next-item__date" aria-hidden="true">
+              <span class="next-item__day">{item.dayNum}</span>
+              <span class="next-item__mon">{item.monthShort}</span>
+            </span>
+            <span class="next-item__text">
+              <span class="next-item__title">{item.title}</span>
+              <span class="next-item__when">
+                {item.weekdayLong}, {item.time}
+                {item.oldStyleLabel && <> · {dict.schedule.oldStyleLabel}: {item.oldStyleLabel}</>}
+              </span>
+            </span>
+            <Icon name="arrow" size={18} />
+          </button>
+        </li>
       ))}
-    </div>
+    </ul>
+  )}
+
+  {layout === 'cards' && (
+    <ul class:list={['wcards', { 'wcards--narrow': narrow }]}>
+      {payload.map((item) => (
+        <li>
+          <button type="button" class="wcard" data-schedule-open={item.id} aria-haspopup="dialog">
+            <span class="wcard__icon"><Icon name={item.icon} size={26} /></span>
+            <span class="wcard__day">{item.weekdayLong}</span>
+            <span class="wcard__time">{item.start}</span>
+            <span class="wcard__title">{item.title}</span>
+            {item.live && liveLabel && <span class="wcard__note">{liveLabel}</span>}
+          </button>
+        </li>
+      ))}
+    </ul>
   )}
 
   {layout === 'calendar' && (
@@ -91,26 +133,28 @@ const calendarDays =
             <span class="wcal__mon">{day.month}</span>
             {day.isToday && labels && <span class="wcal__today">{labels.today}</span>}
           </div>
-          <div class="wcal__items">
+          <ul class="wcal__items">
             {day.items.map((item) => (
-              <button type="button" class="wcal__item" data-schedule-open={item.id} aria-haspopup="dialog">
-                <span class="wcal__time">{item.time}</span>
-                <span class="wcal__title">{item.title}</span>
-                {item.oldStyleLabel && <span class="wcal__old">{dict.schedule.oldStyleLabel}: {item.oldStyleLabel}</span>}
-              </button>
+              <li>
+                <button type="button" class="wcal__item" data-schedule-open={item.id} aria-haspopup="dialog">
+                  <span class="wcal__time">{item.time}</span>
+                  <span class="wcal__title">{item.title}</span>
+                  {item.oldStyleLabel && <span class="wcal__old">{dict.schedule.oldStyleLabel}: {item.oldStyleLabel}</span>}
+                </button>
+              </li>
             ))}
-            {day.items.length === 0 && labels && <p class="wcal__empty">{labels.empty}</p>}
-          </div>
+            {day.items.length === 0 && labels && <li class="wcal__empty">{labels.empty}</li>}
+          </ul>
         </div>
       ))}
     </div>
   )}
 
   {layout === 'list' && (
-    <ul class="schedule-list schedule-list--rich">
+    <ul class="schedule-list">
       {payload.map((item) => (
         <li>
-          <button type="button" class="schedule-item schedule-item--rich" data-schedule-open={item.id} aria-haspopup="dialog">
+          <button type="button" class="schedule-item" data-schedule-open={item.id} aria-haspopup="dialog">
             <span class="date-tile" aria-hidden="true">
               <span class="date-tile__day">{item.dayNum}</span>
               <span class="date-tile__mon">{item.monthShort}</span>
@@ -119,9 +163,7 @@ const calendarDays =
               <span class="schedule-item__meta">
                 <span>{item.dateLabel}</span>
                 <span>{item.time}</span>
-                {item.oldStyleLabel && (
-                  <span class="old-style">{dict.schedule.oldStyleLabel}: {item.oldStyleLabel}</span>
-                )}
+                {item.oldStyleLabel && <span class="old-style">{dict.schedule.oldStyleLabel}: {item.oldStyleLabel}</span>}
               </span>
               <span class="schedule-item__title">{item.title}</span>
               <span class="schedule-item__desc">{item.description}</span>
@@ -138,9 +180,9 @@ const calendarDays =
       {payload.map((item) => (
         <li>
           <button type="button" class="sched-row" data-schedule-open={item.id} aria-haspopup="dialog">
-            <span class="sched-row__when">{weekly ? item.weekdayLong : item.shortDate}</span>
-            <span class="sched-row__time">{item.time}</span>
             <span class="sched-row__title">{item.title}</span>
+            <span class="sched-row__when">{weekly ? item.weekdayLong : item.shortDate}</span>
+            <span class="sched-row__time">{item.start}</span>
           </button>
         </li>
       ))}
@@ -148,45 +190,51 @@ const calendarDays =
   )}
 
   <div class="panel-backdrop" data-panel-backdrop hidden></div>
-  <aside class="panel" data-schedule-panel role="dialog" aria-modal="true" aria-labelledby={`${uid}-title`} hidden>
+  <aside class="panel" data-schedule-panel data-panel-owner={uid} role="dialog" aria-modal="true" aria-labelledby={`${uid}-title`} hidden>
     <div class="panel__header">
       <div>
-        <p class="eyebrow" style="margin:0 0 0.35rem;">{dict.schedule.addToCalendar}</p>
-        <h2 id={`${uid}-title`} data-panel-title style="margin:0;font-size:1.4rem;"></h2>
+        <p class="eyebrow" style="margin:0 0 0.4rem">{dict.schedule.addToCalendar}</p>
+        <h2 id={`${uid}-title`} data-panel-title></h2>
       </div>
-      <button type="button" class="btn btn-secondary" data-panel-close>{dict.schedule.close}</button>
+      <button type="button" class="panel__close" data-panel-close aria-label={dict.schedule.close}>
+        <Icon name="x" size={18} />
+      </button>
     </div>
     <div class="panel__body">
       <p data-panel-desc></p>
-      <p><strong>{dict.schedule.date}:</strong> <span data-panel-date></span></p>
-      <p data-panel-old-wrap hidden><strong>{dict.schedule.oldStyleLabel}:</strong> <span data-panel-old></span></p>
-      <p><strong>{dict.schedule.time}:</strong> <span data-panel-time></span></p>
-      <p><strong>{dict.schedule.location}:</strong> <span data-panel-location></span></p>
+      <dl class="panel__facts">
+        <div><dt>{dict.schedule.date}</dt><dd data-panel-date></dd></div>
+        <div data-panel-old-wrap hidden><dt>{dict.schedule.oldStyleLabel}</dt><dd data-panel-old></dd></div>
+        <div><dt>{dict.schedule.time}</dt><dd data-panel-time></dd></div>
+        <div><dt>{dict.schedule.location}</dt><dd data-panel-location></dd></div>
+      </dl>
       <div class="panel__actions">
-        <a class="btn btn-primary" data-panel-ics download="service.ics">{dict.schedule.downloadIcs}</a>
-        <a class="btn btn-secondary" data-panel-google target="_blank" rel="noopener noreferrer">{dict.schedule.googleCal}</a>
-        <a class="btn btn-secondary" data-panel-map target="_blank" rel="noopener noreferrer">{dict.schedule.directions}</a>
+        <a class="btn btn-primary" data-panel-ics download="service.ics"><Icon name="calendar" size={18} />{dict.schedule.downloadIcs}</a>
+        <a class="btn btn-secondary" data-panel-google target="_blank" rel="noopener noreferrer"><Icon name="external" size={18} />{dict.schedule.googleCal}</a>
+        <a class="btn btn-secondary" data-panel-map target="_blank" rel="noopener noreferrer"><Icon name="pin" size={18} />{dict.schedule.directions}</a>
       </div>
     </div>
   </aside>
 </div>
 
-<script define:vars={{ payload, uid }}>
+<script define:vars={{ payload: clientPayload, uid }}>
   const root = document.querySelector(`[data-schedule-root="${uid}"]`);
   if (root) {
     const byId = Object.fromEntries(payload.map((p) => [p.id, p]));
     const panel = root.querySelector('[data-schedule-panel]');
     const backdrop = root.querySelector('[data-panel-backdrop]');
-    const title = root.querySelector('[data-panel-title]');
-    const desc = root.querySelector('[data-panel-desc]');
-    const date = root.querySelector('[data-panel-date]');
-    const oldWrap = root.querySelector('[data-panel-old-wrap]');
-    const old = root.querySelector('[data-panel-old]');
-    const time = root.querySelector('[data-panel-time]');
-    const location = root.querySelector('[data-panel-location]');
-    const ics = root.querySelector('[data-panel-ics]');
-    const google = root.querySelector('[data-panel-google]');
-    const map = root.querySelector('[data-panel-map]');
+    if (panel && backdrop) document.body.append(backdrop, panel);
+    const q = (sel) => panel?.querySelector(sel);
+    const title = q('[data-panel-title]');
+    const desc = q('[data-panel-desc]');
+    const date = q('[data-panel-date]');
+    const oldWrap = q('[data-panel-old-wrap]');
+    const old = q('[data-panel-old]');
+    const time = q('[data-panel-time]');
+    const location = q('[data-panel-location]');
+    const ics = q('[data-panel-ics]');
+    const google = q('[data-panel-google]');
+    const map = q('[data-panel-map]');
     let opener = null;
 
     function openPanel(id, btn) {
@@ -215,7 +263,7 @@ const calendarDays =
         panel.classList.add('is-open');
         backdrop.classList.add('is-open');
       });
-      panel.querySelector('[data-panel-close]')?.focus();
+      q('[data-panel-close]')?.focus();
     }
 
     function closePanel() {
@@ -232,7 +280,7 @@ const calendarDays =
     root.querySelectorAll('[data-schedule-open]').forEach((btn) => {
       btn.addEventListener('click', () => openPanel(btn.getAttribute('data-schedule-open'), btn));
     });
-    root.querySelector('[data-panel-close]')?.addEventListener('click', closePanel);
+    q('[data-panel-close]')?.addEventListener('click', closePanel);
     backdrop?.addEventListener('click', closePanel);
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closePanel();

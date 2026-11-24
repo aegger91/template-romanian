@@ -2,53 +2,72 @@
 import type { Locale } from '../config/site';
 import { siteConfig } from '../config/site';
 import { t } from '../i18n/ui';
+import { p } from '../i18n/pages';
+import ChurchMark from './ChurchMark.astro';
+import Icon from './Icon.astro';
+import NewsletterForm from './NewsletterForm.astro';
 
 interface Props {
   locale: Locale;
 }
 const { locale } = Astro.props;
 const dict = t(locale);
+const n = p(locale).news;
 const year = new Date().getFullYear();
 const addr = siteConfig.address;
+const lines = siteConfig.nameLines[locale];
+const ro = locale === 'ro';
+const links = [
+  { href: dict.paths.parish, label: dict.nav.parish },
+  { href: dict.paths.schedule, label: dict.nav.schedule },
+  { href: dict.paths.pomelnice, label: dict.nav.pomelnice },
+  { href: dict.paths.livestream, label: dict.nav.livestream },
+  { href: dict.paths.donate, label: dict.nav.donate },
+  { href: dict.paths.contact, label: dict.nav.contact },
+];
 ---
 <footer class="site-footer">
+  <div class="site-footer__band" aria-hidden="true"></div>
   <div class="container site-footer__grid">
     <div>
-      <div class="site-footer__brand">
-        <img src="/icons/cross-byzantine.svg" alt="" width="28" height="28" style="filter: invert(1) sepia(1) saturate(2.5) hue-rotate(5deg); opacity: 0.85;" />
-        <div>
-          <h2>{siteConfig.name[locale]}</h2>
-          <p style="margin:0;max-width:30ch;color:rgba(255,252,247,0.75);">
-            {addr.street}, {addr.city}, {addr.region} {addr.postal}<br />
-            {addr.country[locale]}
-          </p>
-        </div>
-      </div>
-      <p style="margin-top:1.2rem;">
-        <a href={`tel:${siteConfig.phone.replace(/\D/g, '')}`}>{siteConfig.phone}</a><br />
-        <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a>
-      </p>
+      <a class="brand" href={dict.paths.home}>
+        <ChurchMark />
+        <span class="brand__name"><span>{lines[0]}</span><span>{lines[1]}</span></span>
+      </a>
+      <p class="site-footer__text">{siteConfig.tagline[locale]}. {ro ? 'Arhiepiscopia Vadului, Feleacului și Clujului (exemplu).' : 'Archdiocese of Vad, Feleac and Cluj (sample).'}</p>
     </div>
+
     <div>
-      <p class="site-footer__label">{locale === 'ro' ? 'Slujire' : 'Worship'}</p>
-      <nav aria-label="Footer">
-        <a href={dict.paths.schedule}>{dict.nav.schedule}</a>
-        <a href={dict.paths.news}>{dict.nav.news}</a>
-        <a href={dict.paths.livestream}>{dict.nav.livestream}</a>
-        <a href={dict.paths.pomelnice}>{dict.nav.pomelnice}</a>
-      </nav>
+      <h2 class="site-footer__title">{ro ? 'Vizitați-ne' : 'Visit us'}</h2>
+      <ul class="info-list">
+        <li><Icon name="pin" size={18} /><span>{addr.street}<br />{addr.postal} {addr.city}, {addr.country[locale]}</span></li>
+        <li><Icon name="phone" size={18} /><a href={`tel:${siteConfig.phone.replace(/\D/g, '')}`}>{siteConfig.phone}</a></li>
+        <li><Icon name="mail" size={18} /><a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a></li>
+      </ul>
     </div>
+
     <div>
-      <p class="site-footer__label">{locale === 'ro' ? 'Parohie' : 'Parish'}</p>
-      <nav aria-label="Footer secondary">
-        <a href={dict.paths.parish}>{dict.nav.parish}</a>
-        <a href={dict.paths.donate}>{dict.nav.donate}</a>
-        <a href={dict.paths.contact}>{dict.nav.contact}</a>
-      </nav>
+      <h2 class="site-footer__title">{ro ? 'Slujbe săptămânale' : 'Weekly services'}</h2>
+      <dl class="foot-rows">
+        {siteConfig.hours[locale].map((h) => (
+          <div><dt>{h.day}</dt><dd>{h.time.split(' · ').pop()}</dd></div>
+        ))}
+      </dl>
+      <a class="link-arrow" href={dict.paths.schedule} style="color:#fff">{ro ? 'Programul complet' : 'Full schedule'} <Icon name="arrow" size={16} /></a>
+    </div>
+
+    <div>
+      <h2 class="site-footer__title">{n.newsletterTitle}</h2>
+      <p class="site-footer__text" style="margin-top:0;margin-bottom:1rem">{n.newsletterText}</p>
+      <NewsletterForm locale={locale} id="footer-newsletter-email" />
     </div>
   </div>
   <div class="container site-footer__bottom">
     <span>© {year} {siteConfig.name[locale]}. {dict.footer.rights}</span>
-    <span>{dict.footer.template}</span>
+    <nav aria-label={ro ? 'Subsol' : 'Footer'}>
+      <ul class="foot-links" style="display:flex;flex-wrap:wrap;gap:0.35rem 1.1rem;font-size:0.8rem">
+        {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+      </ul>
+    </nav>
   </div>
 </footer>

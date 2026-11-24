@@ -1,0 +1,22 @@
+---
+import Motif from './Motif.astro';
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  lede?: string;
+  align?: 'center' | 'left';
+  light?: boolean;
+  level?: 'h2' | 'h1';
+  id?: string;
+}
+const { eyebrow, title, lede, align = 'center', light = false, level = 'h2', id } = Astro.props;
+const Tag = level;
+---
+<div class:list={['heading', { 'heading--left': align === 'left', 'heading--light': light }]}>
+  {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+  <Tag id={id}>{title}</Tag>
+  <Motif center={align === 'center'} light={light} />
+  {lede && <p class="lede">{lede}</p>}
+  {Astro.slots.has('default') && <div class="heading__aside"><slot /></div>}
+</div>

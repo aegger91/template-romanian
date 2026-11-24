@@ -1,0 +1,33 @@
+---
+import Motif from './Motif.astro';
+import Icon from './Icon.astro';
+
+interface Props {
+  image: { src: string; alt: string };
+  eyebrow?: string;
+  title: string;
+  text?: string;
+  href: string;
+  label: string;
+  secondary?: { href: string; label: string };
+  position?: string;
+}
+const { image, eyebrow, title, text, href, label, secondary, position = 'center' } = Astro.props;
+---
+<section class="band">
+  <div class="band__media">
+    <img src={image.src} alt={image.alt} width="1920" height="960" loading="lazy" style={`object-position:${position}`} />
+  </div>
+  <div class="container">
+    <div class="band__card reveal">
+      {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+      <h2>{title}</h2>
+      <Motif />
+      {text && <p>{text}</p>}
+      <div class="btn-row" style="margin-top:1.25rem">
+        <a class="btn btn-primary" href={href}>{label} <Icon name="arrow" size={16} /></a>
+        {secondary && <a class="btn btn-secondary" href={secondary.href}>{secondary.label}</a>}
+      </div>
+    </div>
+  </div>
+</section>

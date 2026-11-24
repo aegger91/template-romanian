@@ -10,7 +10,7 @@ const path = Astro.url.pathname;
 const roHref = switchLocalePath(path, 'ro');
 const enHref = switchLocalePath(path, 'en');
 ---
-<nav class="lang-switch" aria-label={locale === 'ro' ? 'Limbă' : 'Language'}>
-  <a href={roHref} lang="ro" aria-current={locale === 'ro' ? 'true' : undefined}>RO</a>
-  <a href={enHref} lang="en" aria-current={locale === 'en' ? 'true' : undefined}>EN</a>
+<nav class="lang" aria-label={locale === 'ro' ? 'Limbă' : 'Language'}>
+  <a href={roHref} lang="ro" hreflang="ro" aria-current={locale === 'ro' ? 'true' : undefined}>RO</a>
+  <a href={enHref} lang="en" hreflang="en" aria-current={locale === 'en' ? 'true' : undefined}>EN</a>
 </nav>
