@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-  <!-- Beeswax candle with flame -->
-  <path d="M32 8c2 3 4 5 4 8 0 2.2-1.8 4-4 4s-4-1.8-4-4c0-3 2-5 4-8z" fill="currentColor" opacity="0.25"/>
-  <path d="M32 8c2 3 4 5 4 8 0 2.2-1.8 4-4 4s-4-1.8-4-4c0-3 2-5 4-8z"/>
-  <rect x="26" y="20" width="12" height="34" rx="1" fill="currentColor" opacity="0.12"/>
-  <rect x="26" y="20" width="12" height="34" rx="1"/>
-  <path d="M20 54h24"/>
-  <path d="M18 58h28"/>
-</svg>

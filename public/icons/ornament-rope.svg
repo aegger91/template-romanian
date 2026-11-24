@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 20" fill="none" aria-hidden="true">
-  <!-- Rope-twist column motif as horizontal border -->
-  <path stroke="currentColor" stroke-width="1.5" d="M8 10c8-8 16 8 24 0s16 8 24 0 16 8 24 0 16 8 24 0 16 8 24 0 16 8 24 0 16 8 24 0 16 8 24 0 16 8 24 0 16 8 24 0 16 8 24 0 16 8 24 0 16 8 24 0"/>
-  <circle cx="6" cy="10" r="2.5" fill="currentColor"/>
-  <circle cx="354" cy="10" r="2.5" fill="currentColor"/>
-</svg>
