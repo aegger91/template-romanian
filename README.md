@@ -21,7 +21,11 @@ Serve `dist/` with any static host or drop the folder into a website builder.
 | `src/config/site.ts` | Parish name, address, phone, email, livestream URL, clergy, feature flags |
 | `src/config/images.ts` | Image paths and alt text (swap photos in one place) |
 | `src/config/schedule.ts` | Weekly services, feasts, news items |
-| `src/i18n/ui.ts` | All UI strings (RO / EN) |
+| `src/config/gallery.ts` | Gallery photos, categories and featured icons |
+| `src/i18n/ui.ts` | Navigation, paths and shared UI strings (RO / EN) |
+| `src/i18n/pages.ts` | Inner page copy: headings, cards, timeline, sacraments, steps (RO / EN) |
+
+Inner pages are built from shared views in `src/views/`; each file under `src/pages/` only passes the locale.
 
 ### `calendarStyle`
 
@@ -60,7 +64,11 @@ Edit `src/i18n/ui.ts` for labels and placeholders. Parish-specific prose also li
 |----|----|
 | `/` | `/en/` |
 | `/parohie/` | `/en/parish/` |
+| `/parohie/istoric/` | `/en/parish/history/` |
+| `/parohie/cler/` | `/en/parish/clergy/` |
+| `/parohie/galerie/` | `/en/parish/gallery/` |
 | `/program/` | `/en/schedule/` |
+| `/program/taine/` | `/en/schedule/sacraments/` |
 | `/stiri/` | `/en/news/` |
 | `/transmisie/` | `/en/livestream/` |
 | `/pomelnice/` | `/en/commemoration/` |
@@ -71,7 +79,8 @@ Edit `src/i18n/ui.ts` for labels and placeholders. Parish-specific prose also li
 ## Forms & schedule
 
 - Donation and Pomelnice / Commemoration forms: amount starts at **0**, suggested chips + free field, **no minimum**, no QR codes.
-- Schedule rows open a detail panel with **.ics** download, **Google Calendar** link, and directions.
+- Schedule items (week calendar, event list, weekly list) open a detail panel with **.ics** download, **Google Calendar** link, and directions.
+- Sacrament request form: each sacrament card preselects its service in the form.
 - Contact phone field uses mask `(000)-000-0000`.
 
 ## QA script
@@ -79,5 +88,6 @@ Edit `src/i18n/ui.ts` for labels and placeholders. Parish-specific prose also li
 ```bash
 npm run build
 npx playwright install chromium
-node scripts/qa.mjs
+node scripts/qa.mjs          # overflow, clipping, links at 360/768/1280
+node scripts/functional.mjs  # JS-off content, schedule panels, forms at 0, gallery, menu
 ```
