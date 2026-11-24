@@ -1,5 +1,5 @@
 /**
- * Central image map — swap paths here to rebrand the template.
+ * Central image map: swap paths here to rebrand the template.
  * All files live under public/images/ as WebP. See CREDITS.md.
  */
 export const images = {

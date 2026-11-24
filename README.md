@@ -1,8 +1,8 @@
 # Romanian Orthodox Parish Template
 
-Static-exportable parish website in Romanian Orthodox visual style (Brâncovenesc / Moldavian fresco palette / Maramureș wood / subtle embroidery). Built with **Astro** — no CMS, no Vercel-specific dependencies.
+Static-exportable parish website with a modern Romanian Orthodox design: Voroneț blue page frame, white rounded header card with a gold line-art church mark, tile-grid home on cream, photo banners and flat cards on inner pages. Accents are deep red and gold, with sparing embroidery motifs. Built with **Astro**: no CMS, no Vercel-specific dependencies. Fonts (Playfair Display, Inter, latin + latin-ext) are self-hosted in `public/fonts/`.
 
-**Languages:** Romanian (default, `/`) and English (`/en/…`), with a RO | EN switcher in the main nav.
+**Languages:** Romanian (default, `/`) and English (`/en/…`), with a RO | EN switcher in the header.
 
 ## Setup
 
@@ -35,8 +35,8 @@ In `site.ts`, set:
 calendarStyle: 'new' // or 'old'
 ```
 
-- `'new'` (default) — civil / Revised Julian dates; badge shows “Calendar nou / New calendar”
-- `'old'` — also shows Old Style (Julian, −13 days) next to schedule items
+- `'new'` (default): civil / Revised Julian dates; badge shows “Calendar nou / New calendar”
+- `'old'`: also shows Old Style (Julian, −13 days) next to schedule items
 
 ### Optional blocks
 
@@ -90,4 +90,5 @@ npm run build
 npx playwright install chromium
 node scripts/qa.mjs          # overflow, clipping, links at 360/768/1280
 node scripts/functional.mjs  # JS-off content, schedule panels, forms at 0, gallery, menu
+node scripts/language-fit.mjs # RO/EN diacritics, overflow, nav alignment, menus at 360/768/1280
 ```

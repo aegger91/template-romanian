@@ -55,7 +55,7 @@ export const siteConfig = {
     facebook: '',
     youtube: '',
   },
-  /** Optional page blocks — set false to hide */
+  /** Optional page blocks; set false to hide */
   features: {
     aboutBlock: true,
     visitingBlock: true,
